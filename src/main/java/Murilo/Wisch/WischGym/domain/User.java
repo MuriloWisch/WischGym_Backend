@@ -1,7 +1,10 @@
 package Murilo.Wisch.WischGym.domain;
 
+import Murilo.Wisch.WischGym.domain.enums.Roles;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -22,4 +25,14 @@ public class User {
     @Column(nullable = false,unique = true)
     private String password;
 
+    private boolean active = true;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "role")
+    private Set<Roles> roles;
 }
