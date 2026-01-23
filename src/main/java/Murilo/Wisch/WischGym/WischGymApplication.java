@@ -8,6 +8,7 @@ public class WischGymApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WischGymApplication.class, args);
+		System.out.println("oi");
 	}
 
 }
