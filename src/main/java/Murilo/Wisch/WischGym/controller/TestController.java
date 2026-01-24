@@ -5,8 +5,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TestController {
+
         @GetMapping("/test")
-        public String test(){
-            return "Security functional 🚀";
+        public String test() {
+            System.out.println("✅ CONTROLLER FOI CHAMADO");
+            return "OK";
         }
 }
