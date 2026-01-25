@@ -17,4 +17,9 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
     }
 
+
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequest request){
+
+    }
 }
