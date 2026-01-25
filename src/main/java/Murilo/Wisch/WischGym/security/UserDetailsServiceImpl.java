@@ -33,9 +33,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         System.out.println("EMAIL RECEBIDO: " + email);
         System.out.println("HASH DO BANCO: " + user.getPassword());
-        System.out.println("TESTE MATCHES: " +
-                passwordEncoder.matches("123456", user.getPassword())
-        );
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
@@ -45,5 +42,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                         .collect(Collectors.toSet())
         );
     }
-    }
+
+}
 
