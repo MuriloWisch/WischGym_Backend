@@ -24,5 +24,6 @@ public class AuthController {
     public String login(@RequestBody LoginRequest request){
         Authentication authentication = authenticationManager.authenticate
                 (new UsernamePasswordAuthenticationToken(request.email(),request.password()));
+        return "Login OK";
     }
 }
