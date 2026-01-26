@@ -17,5 +17,4 @@ public class TestController {
     public String register() {
         return "Register ok";
     }
-
 }
