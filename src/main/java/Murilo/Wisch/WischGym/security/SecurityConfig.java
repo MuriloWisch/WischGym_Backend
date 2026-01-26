@@ -21,8 +21,6 @@ public class SecurityConfig {
             AuthenticationProvider authenticationProvider
     ) throws Exception {
 
-        System.out.println("🔥 SECURITY FILTER CARREGADO");
-
         http
                 .csrf(csrf -> csrf.disable())
                 .authenticationProvider(authenticationProvider)
@@ -33,7 +31,6 @@ public class SecurityConfig {
                 //.httpBasic(Customizer.withDefaults())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            System.out.println("AUTH ENTROU E FALHOU");
                             response.setStatus(401);
                         })
                 );
