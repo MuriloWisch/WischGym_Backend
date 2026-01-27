@@ -1,5 +1,28 @@
 package Murilo.Wisch.WischGym.security.jwt;
 
-public class JwtAuthenticationFilter {
+import io.jsonwebtoken.io.IOException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailService;
+
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailService) {
+        this.jwtService = jwtService;
+        this.userDetailService = userDetailService;
+    }
+
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        final String authHeader = request.getHeader("Authorization");
+    }
 }
