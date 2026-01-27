@@ -4,6 +4,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -12,15 +14,22 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private static final String SECRET = "wischgymchavesecretabemsecreta97";
+    @Value("${jwt.secret}")
+    private String secret;
 
-    private static final long EXPIRATION = 1000 * 60 * 60;
+    @Value("${jwt.expiration}")
+    private long expiration;
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private Key key;
 
-    public String generateTokens(String email) {
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    public String generateToken(String email) {
         return Jwts.builder().setSubject(email).setIssuedAt
-                (new Date()).setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                (new Date()).setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
 
