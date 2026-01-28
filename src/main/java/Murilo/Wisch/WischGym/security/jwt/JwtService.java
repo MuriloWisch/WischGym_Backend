@@ -35,7 +35,7 @@ public class JwtService {
 
     public String extractEmail(String token){
         return Jwts.parserBuilder().setSigningKey(key)
-                .build().parseClaimsJwt(token).getBody().getSubject();
+                .build().parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean isTokenValid(String token) {
