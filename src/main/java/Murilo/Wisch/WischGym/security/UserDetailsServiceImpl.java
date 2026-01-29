@@ -31,9 +31,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario Não encontrado"));
 
-        System.out.println("EMAIL RECEBIDO: " + email);
-        System.out.println("HASH DO BANCO: " + user.getPassword());
-
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
