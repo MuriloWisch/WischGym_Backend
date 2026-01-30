@@ -1,4 +1,4 @@
-package Murilo.Wisch.WischGym.controller;
+package Murilo.Wisch.WischGym.tests;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
