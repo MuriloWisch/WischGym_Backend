@@ -38,4 +38,11 @@ public class Aluno {
 
     private LocalDateTime dataCadastro;
 
+    public void prePersist(){
+        this.dataCadastro = LocalDateTime.now();
+        if (this.status == null){
+            this.status = StatusAlunos.ATIVO;
+        }
+    }
+
 }
