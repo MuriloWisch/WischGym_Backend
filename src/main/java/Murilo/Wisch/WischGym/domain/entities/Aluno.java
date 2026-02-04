@@ -45,5 +45,4 @@ public class Aluno {
             this.status = StatusAlunos.ATIVO;
         }
     }
-
 }
