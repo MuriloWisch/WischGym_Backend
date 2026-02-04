@@ -38,6 +38,7 @@ public class Aluno {
 
     private LocalDateTime dataCadastro;
 
+    @PrePersist
     public void prePersist(){
         this.dataCadastro = LocalDateTime.now();
         if (this.status == null){
