@@ -36,5 +36,18 @@ public class AlunoService {
         return toResponseDTO(aluno);
     }
 
+    private AlunoResponseDTO toResponseDTO(Aluno aluno){
+        AlunoResponseDTO dto = new AlunoResponseDTO();
+        dto.setId(aluno.getId());
+        dto.setNome(aluno.getNome());
+        dto.setCpf(aluno.getCpf());
+        dto.setEmail(aluno.getEmail());
+        dto.setTelefone(aluno.getTelefone());
+        dto.setDataNascimento(aluno.getDataNascimento());
+        dto.setStatus(aluno.getStatus());
+        dto.setDataCadastro(aluno.getDataCadastro());
+        return dto;
+    }
+
 
 }
