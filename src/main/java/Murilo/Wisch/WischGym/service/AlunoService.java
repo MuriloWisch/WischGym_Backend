@@ -5,6 +5,8 @@ import Murilo.Wisch.WischGym.dto.aluno.AlunoCreateDTO;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoResponseDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +25,10 @@ public class AlunoService {
 
         Aluno salvo = alunoRepository.save(aluno);
         return toResponseDTO(salvo);
+    }
+
+    public Page<AlunoResponseDTO> listar(Pageable pageable) {
+        return alunoRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
 
