@@ -26,9 +26,8 @@ public class AlunoController {
         return alunoService.listar(pageable);
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public AlunoResponseDTO buscar(@PathVariable Long id){
         return alunoService.buscarPorId(id);
     }
-
 }
