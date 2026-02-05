@@ -31,5 +31,10 @@ public class AlunoService {
         return alunoRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
+    public AlunoResponseDTO buscarPorId(Long id){
+        Aluno aluno = alunoRepository.findById(id).orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+        return toResponseDTO(aluno);
+    }
+
 
 }
