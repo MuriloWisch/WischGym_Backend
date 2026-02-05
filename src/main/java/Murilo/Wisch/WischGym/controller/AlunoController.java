@@ -5,10 +5,9 @@ import Murilo.Wisch.WischGym.dto.aluno.AlunoResponseDTO;
 import Murilo.Wisch.WischGym.service.AlunoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/alunos")
@@ -20,6 +19,11 @@ public class AlunoController {
     @PostMapping
     public AlunoResponseDTO criar(@RequestBody @Valid AlunoCreateDTO dto){
         return alunoService.criar(dto);
+    }
+
+    @GetMapping
+    public Page<AlunoResponseDTO> listar (Pageable pageable){
+        return alunoService.listar(pageable);
     }
 
 }
