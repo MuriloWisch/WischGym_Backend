@@ -16,6 +16,10 @@ import java.time.LocalDateTime;
 @Builder
 public class Aluno {
 
+    @ManyToOne
+    @JoinColumn(name = "plano_id")
+    private Plano plano;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
