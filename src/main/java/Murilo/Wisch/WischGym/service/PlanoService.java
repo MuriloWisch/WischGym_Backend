@@ -23,4 +23,14 @@ public class PlanoService {
     public Plano buscarPorid(Long id) {
         return planoRepository.findById(id).orElseThrow(() -> new RuntimeException("Plano não encontrado"));
     }
+
+    public Plano atualizar(Long id, Plano planoAtualizado){
+        Plano plano = buscarPorid(id);
+
+        plano.setNome(planoAtualizado.getNome());
+        plano.setValor(planoAtualizado.getValor());
+        plano.setDescricao(planoAtualizado.getDescricao());
+
+        return planoRepository.save(plano);
+    }
 }

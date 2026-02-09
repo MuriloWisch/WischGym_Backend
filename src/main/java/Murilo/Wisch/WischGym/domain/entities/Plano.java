@@ -24,6 +24,9 @@ public class Plano {
     private String nome;
 
     @Column(nullable = false)
+    private String descricao;
+
+    @Column(nullable = false)
     private BigDecimal valor;
 
     @Column(nullable = false)
