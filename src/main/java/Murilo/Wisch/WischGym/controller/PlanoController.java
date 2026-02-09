@@ -42,4 +42,9 @@ public class PlanoController {
         return ResponseEntity.ok(planoService.atualizar(id, plano));
     }
 
+    public ResponseEntity<Void> deletar(@PathVariable Long id){
+        planoService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
