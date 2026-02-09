@@ -37,11 +37,13 @@ public class PlanoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasHole('ADMIM')")
+    @PreAuthorize("hasHole('ADMIN')")
     public ResponseEntity<Plano> atualizar(@PathVariable Long id, @RequestBody Plano plano){
         return ResponseEntity.ok(planoService.atualizar(id, plano));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasHole('ADMIN')")
     public ResponseEntity<Void> deletar(@PathVariable Long id){
         planoService.deletar(id);
         return ResponseEntity.noContent().build();
