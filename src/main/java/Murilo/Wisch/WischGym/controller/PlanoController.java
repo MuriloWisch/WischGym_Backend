@@ -36,4 +36,10 @@ public class PlanoController {
         return ResponseEntity.ok(planoService.buscarPorid(id));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasHole('ADMIM')")
+    public ResponseEntity<Plano> atualizar(@PathVariable Long id, @RequestBody Plano plano){
+        return ResponseEntity.ok(planoService.atualizar(id, plano));
+    }
+
 }
