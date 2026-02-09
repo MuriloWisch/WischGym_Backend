@@ -19,4 +19,8 @@ public class PlanoService {
     public List<Plano> listar(){
         return planoRepository.findAll();
     }
+
+    public Plano buscarPorid(Long id) {
+        return planoRepository.findById(id).orElseThrow(() -> new RuntimeException("Plano não encontrado"));
+    }
 }
