@@ -1,7 +1,10 @@
 package Murilo.Wisch.WischGym.controller;
 
 import Murilo.Wisch.WischGym.domain.entities.Plano;
+import Murilo.Wisch.WischGym.dto.plano.PlanoCreateDTO;
+import Murilo.Wisch.WischGym.dto.plano.PlanoResponseDTO;
 import Murilo.Wisch.WischGym.service.PlanoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +23,8 @@ public class PlanoController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Plano> criar(@RequestBody Plano plano){
-        return ResponseEntity.ok(planoService.criar(plano));
+    public ResponseEntity<PlanoResponseDTO> criar(@RequestBody PlanoCreateDTO dto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(planoService.criar(dto));
     }
 
     @GetMapping
