@@ -33,6 +33,6 @@ public class Plano {
     private Integer duracaoMeses;
 
     @Column(nullable = false)
-    private Boolean ativo = true;
+    private boolean ativo = true;
 
 }
