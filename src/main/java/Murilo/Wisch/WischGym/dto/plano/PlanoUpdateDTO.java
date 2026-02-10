@@ -1,4 +1,13 @@
 package Murilo.Wisch.WischGym.dto.plano;
 
-public record PlanoUpdateDTO() {
+import java.math.BigDecimal;
+
+public record PlanoUpdateDTO(
+        String nome,
+        String descricao,
+        BigDecimal valor,
+        Integer duracaoMeses,
+        Boolean ativo
+) {
+
 }
