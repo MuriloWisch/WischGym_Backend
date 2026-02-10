@@ -16,6 +16,9 @@ public class PlanoService {
     }
 
     public Plano criar(Plano plano){
+        if (plano.getAtivo() == null){
+            plano.setAtivo(true);
+        }
         return planoRepository.save(plano);
     }
     public List<Plano> listar(){
