@@ -2,9 +2,11 @@ package Murilo.Wisch.WischGym.service;
 
 import Murilo.Wisch.WischGym.domain.entities.Plano;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class PlanoService {
 
     private final PlanoRepository planoRepository;

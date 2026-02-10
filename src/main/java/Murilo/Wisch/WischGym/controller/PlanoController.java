@@ -48,5 +48,4 @@ public class PlanoController {
         planoService.deletar(id);
         return ResponseEntity.noContent().build();
     }
-
 }
