@@ -4,12 +4,16 @@ import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.entities.Plano;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "matriculas")
+@Getter
+@Setter
 public class Matricula {
 
     @Id
