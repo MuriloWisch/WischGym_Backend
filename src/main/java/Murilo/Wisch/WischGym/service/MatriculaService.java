@@ -1,9 +1,18 @@
 package Murilo.Wisch.WischGym.service;
 
+import Murilo.Wisch.WischGym.domain.Matricula;
+import Murilo.Wisch.WischGym.domain.entities.Aluno;
+import Murilo.Wisch.WischGym.domain.entities.Plano;
+import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
+import Murilo.Wisch.WischGym.dto.matricula.MatriculaCreateDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
 import org.springframework.stereotype.Service;
+
+import javax.swing.text.html.Option;
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class MatriculaService {
@@ -16,6 +25,32 @@ public class MatriculaService {
         this.matriculaRepository = matriculaRepository;
         this.alunoRepository = alunoRepository;
         this.planoRepository = planoRepository;
+    }
+
+    public Matricula matricular(MatriculaCreateDTO dto){
+
+        Aluno aluno = alunoRepository.findById(dto.getAlunoId()).orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
+
+        Plano plano = planoRepository.findById(dto.getPlanoId()).orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
+
+        Optional<Matricula> matriculaAtiva = matriculaRepository.findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA);
+
+        if (matriculaAtiva.isPresent()) {
+            throw new RuntimeException("Aluno ja possui esta matricula ativa");
+        }
+
+        LocalDate dataInicio = LocalDate.now();
+        LocalDate dataFim = dataInicio.plusMonths(plano.getDuracaoMeses());
+
+        Matricula matricula = new Matricula();
+        matricula.setAluno(aluno);
+        matricula.setPlano(plano);
+        matricula.setDataInicio(dataInicio);
+        matricula.setDataFim(dataFim);
+        matricula.setStatus(StatusMatricula.ATIVA);
+        matricula.setValor(plano.getValor());
+
+        return matriculaRepository.save(matricula);
     }
     
 
