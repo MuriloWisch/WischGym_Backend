@@ -5,10 +5,7 @@ import Murilo.Wisch.WischGym.dto.matricula.MatriculaCreateDTO;
 import Murilo.Wisch.WischGym.service.MatriculaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/matriculas")
@@ -24,5 +21,11 @@ public class MatriculaController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Matricula> matricular(@RequestBody MatriculaCreateDTO dto){
         return ResponseEntity.ok(matriculaService.matricular(dto));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("HasAnyRole('ADMIN','PROFESSOR')")
+    public ResponseEntity<Matricula> buscar(@PathVariable long id){
+        return ResponseEntity.ok(matriculaService.buscarPorId(id));
     }
 }
