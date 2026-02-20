@@ -10,7 +10,6 @@ import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -52,6 +51,21 @@ public class MatriculaService {
 
         return matriculaRepository.save(matricula);
     }
-    
+
+    public Matricula buscarPorId(Long id){
+        Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula Não encontrada"));
+
+        atualizarStatusSeNecessario(matricula);
+        return matricula;
+    }
+
+    private void atualizarStatusSeNecessario(Matricula matricula) {
+        if (matricula.getStatus() == StatusMatricula.ATIVA && matricula.getDataFim().isBefore(LocalDate.now())){
+
+            matricula.setStatus(StatusMatricula.VENCIDA);
+            matriculaRepository.save(matricula);
+        }
+    }
+
 
 }
