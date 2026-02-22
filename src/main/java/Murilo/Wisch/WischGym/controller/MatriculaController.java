@@ -28,4 +28,10 @@ public class MatriculaController {
     public ResponseEntity<Matricula> buscar(@PathVariable long id){
         return ResponseEntity.ok(matriculaService.buscarPorId(id));
     }
+
+    @PutMapping("/{id}/renovar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Matricula> renovar(@PathVariable Long id){
+        return ResponseEntity.ok(matriculaService.renovar(id));
+    }
 }
