@@ -12,6 +12,7 @@ import Murilo.Wisch.WischGym.repository.PlanoRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -116,6 +117,10 @@ public class MatriculaService {
             aluno.setStatus(StatusAlunos.ATIVO);
         }
         alunoRepository.save(aluno);
+    }
+
+    public List<Matricula> listarPorStatus(StatusMatricula status){
+        return matriculaRepository.findByStatus(status);
     }
 
 
