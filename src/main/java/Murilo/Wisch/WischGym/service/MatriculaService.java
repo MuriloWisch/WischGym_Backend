@@ -67,5 +67,27 @@ public class MatriculaService {
         }
     }
 
+    public Matricula renovar(Long id){
+        Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula não encontrada"));
+
+        Plano plano = matricula.getPlano();
+
+        if (matricula.getStatus() == StatusMatricula.CANCELADA){
+            throw new RuntimeException("Não é possivel renovar uma matricula ja cancelada");
+        }
+
+        LocalDate hoje = LocalDate.now();
+
+        if (matricula.getStatus() == StatusMatricula.ATIVA && matricula.getDataFim().isAfter(hoje)){
+            matricula.setDataFim(matricula.getDataFim().plusMonths(plano.getDuracaoMeses()));
+        } else {
+            matricula.setDataInicio(hoje);
+            matricula.setDataFim(hoje.plusMonths(plano.getDuracaoMeses()));
+        }
+        matricula.setStatus(StatusMatricula.ATIVA);
+        return matriculaRepository.save(matricula);
+
+    }
+
 
 }
