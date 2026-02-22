@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
 
     Optional<Matricula> findByAlunoIdAndStatus(Long alunoId, StatusMatricula status);
+
+    boolean existsByAlunoAndStatus(Long alunoid, StatusMatricula status);
 }

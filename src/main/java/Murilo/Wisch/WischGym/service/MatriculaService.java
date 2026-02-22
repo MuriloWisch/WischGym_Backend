@@ -3,6 +3,7 @@ package Murilo.Wisch.WischGym.service;
 import Murilo.Wisch.WischGym.domain.Matricula;
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.entities.Plano;
+import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
 import Murilo.Wisch.WischGym.dto.matricula.MatriculaCreateDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
@@ -64,6 +65,7 @@ public class MatriculaService {
 
             matricula.setStatus(StatusMatricula.VENCIDA);
             matriculaRepository.save(matricula);
+            atualizarStatusAluno(matricula.getAluno());
         }
     }
 
@@ -97,7 +99,23 @@ public class MatriculaService {
         }
 
         matricula.setStatus(StatusMatricula.CANCELADA);
-        return matriculaRepository.save(matricula);
+        Matricula matriculaSalva = matriculaRepository.save(matricula);
+
+        atualizarStatusAluno(matricula.getAluno());
+        return matriculaSalva;
+    }
+
+
+    private void atualizarStatusAluno(Aluno aluno){
+        boolean possuiMatriculaAtiva =
+                matriculaRepository.existsByAlunoAndStatus(aluno.getId(),StatusMatricula.ATIVA);
+
+        if (!possuiMatriculaAtiva) {
+            aluno.setStatus(StatusAlunos.INADIMPLENTE);
+        }else{
+            aluno.setStatus(StatusAlunos.ATIVO);
+        }
+        alunoRepository.save(aluno);
     }
 
 
