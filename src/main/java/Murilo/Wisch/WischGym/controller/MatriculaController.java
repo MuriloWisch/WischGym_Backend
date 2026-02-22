@@ -19,19 +19,25 @@ public class MatriculaController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Matricula> matricular(@RequestBody MatriculaCreateDTO dto){
+    public ResponseEntity<Matricula> matricular(@RequestBody MatriculaCreateDTO dto) {
         return ResponseEntity.ok(matriculaService.matricular(dto));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("HasAnyRole('ADMIN','PROFESSOR')")
-    public ResponseEntity<Matricula> buscar(@PathVariable long id){
+    public ResponseEntity<Matricula> buscar(@PathVariable long id) {
         return ResponseEntity.ok(matriculaService.buscarPorId(id));
     }
 
     @PutMapping("/{id}/renovar")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Matricula> renovar(@PathVariable Long id){
+    public ResponseEntity<Matricula> renovar(@PathVariable Long id) {
         return ResponseEntity.ok(matriculaService.renovar(id));
+    }
+
+    @PutMapping("/{id}/cancelar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Matricula> cancelar(@PathVariable Long id) {
+        return ResponseEntity.ok(matriculaService.cancelar(id));
     }
 }

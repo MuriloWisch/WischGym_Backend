@@ -89,5 +89,16 @@ public class MatriculaService {
 
     }
 
+    public Matricula cancelar(Long id) {
+        Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula não encontrada"));
+
+        if (matricula.getStatus() == StatusMatricula.CANCELADA){
+            throw new RuntimeException("Esta matricula ja esta cancela");
+        }
+
+        matricula.setStatus(StatusMatricula.CANCELADA);
+        return matriculaRepository.save(matricula);
+    }
+
 
 }
