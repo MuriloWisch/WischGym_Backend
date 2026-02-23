@@ -123,5 +123,9 @@ public class MatriculaService {
         return matriculaRepository.findByStatus(status);
     }
 
+    public Matricula buscarAtivaPorAluno(Long alunoId){
+        return matriculaRepository.findByAlunoIdAndStatus(alunoId, StatusMatricula.ATIVA)
+                .orElseThrow(() -> new RuntimeException("Aluno não possui matricula ativa"));
+    }
 
 }

@@ -50,4 +50,10 @@ public class MatriculaController {
             @PathVariable StatusMatricula status) {
         return ResponseEntity.ok(matriculaService.listarPorStatus(status));
     }
+
+    @GetMapping("/aluno/{alunoId}/ativa")
+    @PreAuthorize("HasAnyRole('ADMIN','PROFESSOR')")
+    public ResponseEntity<Matricula> buscarMatriculaAtiva(@PathVariable Long alunoId){
+        return ResponseEntity.ok(matriculaService.buscarAtivaPorAluno(alunoId));
+    }
 }
