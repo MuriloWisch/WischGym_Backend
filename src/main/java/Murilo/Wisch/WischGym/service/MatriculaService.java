@@ -9,6 +9,7 @@ import Murilo.Wisch.WischGym.dto.matricula.MatriculaCreateDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -126,6 +127,24 @@ public class MatriculaService {
     public Matricula buscarAtivaPorAluno(Long alunoId){
         return matriculaRepository.findByAlunoIdAndStatus(alunoId, StatusMatricula.ATIVA)
                 .orElseThrow(() -> new RuntimeException("Aluno não possui matricula ativa"));
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void atualizarMatriculasVencidas(){
+     List<Matricula> matriculasAtivas = matriculaRepository.findByStatus(StatusMatricula.ATIVA);
+
+     LocalDate hoje = LocalDate.now();
+
+     for (Matricula matricula : matriculasAtivas){
+
+         if (matricula.getDataFim().isBefore(hoje)){
+
+             matricula.setStatus(StatusMatricula.ATIVA);
+             matriculaRepository.save(matricula);
+
+             atualizarStatusAluno(matricula.getAluno());
+         }
+      }
     }
 
 }
