@@ -19,7 +19,7 @@ public class Pagamento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "aluno_id", nullable = false)
@@ -36,18 +36,19 @@ public class Pagamento {
     private LocalDate dataVencimento;
 
     @Column(name = "data_pagamento")
-    private LocalDate datapagamento;
+    private LocalDate dataPagamento;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "forma_pagamento")
+    @Column(nullable = false)
     private StatusPagamento status;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "forma_pagamento")
     private FormaPagamento formaPagamento;
 
     private String observacao;
 
-    private Pagamento(){
+    protected Pagamento(){
 
     }
 
