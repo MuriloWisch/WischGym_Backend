@@ -22,10 +22,6 @@ public class Pagamento {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "aluno_id", nullable = false)
-    private Aluno aluno;
-
-    @ManyToOne
     @JoinColumn(name = "matricula_id", nullable = false)
     private Matricula matricula;
 
@@ -48,6 +44,6 @@ public class Pagamento {
 
     private String observacao;
 
-    protected Pagamento(){
+    public Pagamento(){
     }
 }

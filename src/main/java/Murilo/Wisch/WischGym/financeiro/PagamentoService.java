@@ -1,9 +1,11 @@
 package Murilo.Wisch.WischGym.financeiro;
 
 import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+@Service
 public class PagamentoService {
 
     private final PagamentoRepository pagamentoRepository;

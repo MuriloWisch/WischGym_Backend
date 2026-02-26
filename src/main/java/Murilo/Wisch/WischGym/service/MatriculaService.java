@@ -6,6 +6,9 @@ import Murilo.Wisch.WischGym.domain.entities.Plano;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
 import Murilo.Wisch.WischGym.dto.matricula.MatriculaCreateDTO;
+import Murilo.Wisch.WischGym.financeiro.Pagamento;
+import Murilo.Wisch.WischGym.financeiro.PagamentoRepository;
+import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
@@ -23,11 +26,13 @@ public class MatriculaService {
     private final MatriculaRepository matriculaRepository;
     private final AlunoRepository alunoRepository;
     private final PlanoRepository planoRepository;
+    private final PagamentoRepository pagamentoRepository;
 
-    public MatriculaService(MatriculaRepository matriculaRepository, AlunoRepository alunoRepository, PlanoRepository planoRepository) {
+    public MatriculaService(MatriculaRepository matriculaRepository, AlunoRepository alunoRepository, PlanoRepository planoRepository, PagamentoRepository pagamentoRepository) {
         this.matriculaRepository = matriculaRepository;
         this.alunoRepository = alunoRepository;
         this.planoRepository = planoRepository;
+        this.pagamentoRepository = pagamentoRepository;
     }
 
     public Matricula matricular(MatriculaCreateDTO dto){
@@ -53,8 +58,21 @@ public class MatriculaService {
         matricula.setStatus(StatusMatricula.ATIVA);
         matricula.setValor(plano.getValor());
 
-        return matriculaRepository.save(matricula);
+        Matricula matriculaSalva = matriculaRepository.save(matricula);
+
+
+        Pagamento pagamento = new Pagamento();
+        pagamento.setMatricula(matriculaSalva);
+        pagamento.setValor(plano.getValor());
+        pagamento.setDataVencimento(dataInicio);
+        pagamento.setStatus(StatusPagamento.PENDENTE);
+
+        pagamentoRepository.save(pagamento);
+
+        return matriculaSalva;
     }
+
+
 
     public Matricula buscarPorId(Long id){
         Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula Não encontrada"));
@@ -141,7 +159,7 @@ public class MatriculaService {
 
          if (matricula.getDataFim().isBefore(hoje)){
 
-             matricula.setStatus(StatusMatricula.ATIVA);
+             matricula.setStatus(StatusMatricula.VENCIDA);
              matriculaRepository.save(matricula);
 
              atualizarStatusAluno(matricula.getAluno());
