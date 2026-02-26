@@ -49,7 +49,5 @@ public class Pagamento {
     private String observacao;
 
     protected Pagamento(){
-
     }
-
 }

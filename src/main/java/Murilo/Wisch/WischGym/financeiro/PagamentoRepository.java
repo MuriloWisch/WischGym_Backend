@@ -9,12 +9,10 @@ import java.util.List;
 
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
-    List<Pagamento> findByStatus(StatusPagamento status);
-
-    List<Pagamento> findByAlunoId(Long alunoId);
-
     List<Pagamento> findByMatriculaId(Long matriculaId);
 
-    List<Pagamento> findByStatusAndDataVencimentoBefore(StatusPagamento status, LocalDate data
-    );
+    List<Pagamento> findByStatus(StatusPagamento status);
+
+    boolean existsByMatriculaIdAndStatus(Long matriculaId, StatusPagamento status);
+
 }
