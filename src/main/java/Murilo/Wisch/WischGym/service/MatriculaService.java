@@ -44,7 +44,7 @@ public class MatriculaService {
         Optional<Matricula> matriculaAtiva = matriculaRepository.findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA);
 
         if (matriculaAtiva.isPresent()) {
-            throw new RuntimeException("Aluno ja possui esta matricula ativa");
+            throw new RuntimeException("Aluno ja possui uma matricula ativa");
         }
 
         LocalDate dataInicio = LocalDate.now();
@@ -67,12 +67,12 @@ public class MatriculaService {
         pagamento.setDataVencimento(dataInicio);
         pagamento.setStatus(StatusPagamento.PENDENTE);
 
+
+
         pagamentoRepository.save(pagamento);
 
         return matriculaSalva;
     }
-
-
 
     public Matricula buscarPorId(Long id){
         Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula Não encontrada"));
@@ -166,5 +166,4 @@ public class MatriculaService {
          }
       }
     }
-
 }
