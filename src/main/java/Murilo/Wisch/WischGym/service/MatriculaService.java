@@ -93,6 +93,12 @@ public class MatriculaService {
 
         Plano plano = matricula.getPlano();
 
+        Aluno aluno = matricula.getAluno();
+
+        if(aluno.isInadimplente()){
+            throw new RuntimeException("Aluno inadimplente. Regularize os pagamentos.");
+        }
+
         if (matricula.getStatus() == StatusMatricula.CANCELADA){
             throw new RuntimeException("Não é possivel renovar uma matricula ja cancelada");
         }

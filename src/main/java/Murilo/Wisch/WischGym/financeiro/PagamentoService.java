@@ -1,9 +1,12 @@
 package Murilo.Wisch.WischGym.financeiro;
 
 import Murilo.Wisch.WischGym.domain.Matricula;
+import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
 import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
+import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +18,12 @@ public class PagamentoService {
 
     private final PagamentoRepository pagamentoRepository;
     private final MatriculaRepository matriculaRepository;
+    private final AlunoRepository alunoRepository;
 
-    public PagamentoService(PagamentoRepository pagamentoRepository, MatriculaRepository matriculaRepository) {
+    public PagamentoService(PagamentoRepository pagamentoRepository, MatriculaRepository matriculaRepository, AlunoRepository alunoRepository) {
         this.pagamentoRepository = pagamentoRepository;
         this.matriculaRepository = matriculaRepository;
+        this.alunoRepository = alunoRepository;
     }
     public Pagamento pagar(Long id, PagamentoDTO dto) {
         Pagamento pagamento = pagamentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pagamento não foi encontrado"));
@@ -61,6 +66,7 @@ public class PagamentoService {
         }
     }
 
+    @Transactional
     @Scheduled(cron = "0 0 0 * * ?")
     public void atualizarPagamentosAtrasados() {
 
@@ -74,7 +80,13 @@ public class PagamentoService {
         for (Pagamento pagamento : pagamentosVencidos) {
 
             pagamento.setStatus(StatusPagamento.ATRASADO);
-            pagamentoRepository.save(pagamento);
+
+            Aluno aluno = pagamento.getMatricula().getAluno();
+            aluno.setInadimplente(true);
+            aluno.setAtivo(false);
+
         }
+        pagamentoRepository.saveAll(pagamentosVencidos);
+
     }
 }
