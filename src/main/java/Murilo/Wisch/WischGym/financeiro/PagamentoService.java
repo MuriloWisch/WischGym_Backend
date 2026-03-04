@@ -34,7 +34,7 @@ public class PagamentoService {
         return pagamentoRepository.save(pagamento);
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0 0 * * ?")
     public void gerarMensalidadesAutomaticas(){
         List<Matricula> matriculasAtivas = matriculaRepository.findByStatus(StatusMatricula.ATIVA);
 
@@ -59,8 +59,22 @@ public class PagamentoService {
                 pagamentoRepository.save(pagamento);
             }
         }
-
-
     }
 
+    @Scheduled(fixedRate = 60000)
+    public void atualizarPagamentosAtrasados() {
+
+        List<Pagamento> pagamentosVencidos =
+                pagamentoRepository
+                        .findByDataVencimentoBeforeAndStatus(
+                                LocalDate.now(),
+                                StatusPagamento.PENDENTE
+                        );
+
+        for (Pagamento pagamento : pagamentosVencidos) {
+
+            pagamento.setStatus(StatusPagamento.ATRASADO);
+            pagamentoRepository.save(pagamento);
+        }
+    }
 }

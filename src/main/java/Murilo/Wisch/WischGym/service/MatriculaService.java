@@ -67,8 +67,6 @@ public class MatriculaService {
         pagamento.setDataVencimento(dataInicio);
         pagamento.setStatus(StatusPagamento.PENDENTE);
 
-
-
         pagamentoRepository.save(pagamento);
 
         return matriculaSalva;

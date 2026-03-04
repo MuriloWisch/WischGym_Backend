@@ -15,4 +15,6 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
     boolean existsByMatriculaIdAndStatus(Long matriculaId, StatusPagamento status);
 
+    List<Pagamento> findByDataVencimentoBeforeAndStatus(LocalDate data, StatusPagamento status);
+
 }
