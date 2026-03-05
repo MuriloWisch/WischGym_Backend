@@ -34,6 +34,9 @@ public class Matricula {
     @Column(nullable = false)
     private LocalDate dataFim;
 
+    @Column(nullable = false)
+    private LocalDate proximoPagamento;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusMatricula status;

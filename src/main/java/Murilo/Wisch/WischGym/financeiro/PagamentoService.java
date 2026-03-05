@@ -7,6 +7,7 @@ import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,9 @@ public class PagamentoService {
 
     private final PagamentoRepository pagamentoRepository;
     private final MatriculaRepository matriculaRepository;
-    private final AlunoRepository alunoRepository;
+
+    @Autowired
+    private AlunoRepository alunoRepository;
 
     public PagamentoService(PagamentoRepository pagamentoRepository, MatriculaRepository matriculaRepository, AlunoRepository alunoRepository) {
         this.pagamentoRepository = pagamentoRepository;
@@ -84,9 +87,31 @@ public class PagamentoService {
             Aluno aluno = pagamento.getMatricula().getAluno();
             aluno.setInadimplente(true);
             aluno.setAtivo(false);
-
+            alunoRepository.save(aluno);
         }
         pagamentoRepository.saveAll(pagamentosVencidos);
 
+    }
+
+    @Scheduled(fixedRate = 10000)
+    public void gerarCobrancasMensais(){
+        List<Matricula> matriculas = matriculaRepository.findByStatus(StatusMatricula.ATIVA);
+
+        for (Matricula matricula : matriculas) {
+            if (matricula.getProximoPagamento().isBefore(LocalDate.now())
+                    || matricula.getProximoPagamento().isEqual(LocalDate.now())){
+                Pagamento pagamento = new Pagamento();
+
+                pagamento.setMatricula(matricula);
+                pagamento.setStatus(StatusPagamento.PENDENTE);
+                pagamento.setValor(matricula.getPlano().getValor());
+                pagamento.setDataVencimento(matricula.getProximoPagamento());
+
+                pagamentoRepository.save(pagamento);
+
+                matricula.setProximoPagamento(matricula.getProximoPagamento().plusMonths(1));
+                matriculaRepository.save(matricula);
+            }
+        }
     }
 }

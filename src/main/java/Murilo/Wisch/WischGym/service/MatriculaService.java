@@ -57,6 +57,7 @@ public class MatriculaService {
         matricula.setDataFim(dataFim);
         matricula.setStatus(StatusMatricula.ATIVA);
         matricula.setValor(plano.getValor());
+        matricula.setProximoPagamento(LocalDate.now().plusMonths(1));
 
         Matricula matriculaSalva = matriculaRepository.save(matricula);
 
@@ -64,7 +65,7 @@ public class MatriculaService {
         Pagamento pagamento = new Pagamento();
         pagamento.setMatricula(matriculaSalva);
         pagamento.setValor(plano.getValor());
-        pagamento.setDataVencimento(dataInicio);
+        pagamento.setDataVencimento(dataInicio.plusMonths(1));
         pagamento.setStatus(StatusPagamento.PENDENTE);
 
         pagamentoRepository.save(pagamento);
