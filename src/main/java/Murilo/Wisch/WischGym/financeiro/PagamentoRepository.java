@@ -1,9 +1,11 @@
 package Murilo.Wisch.WischGym.financeiro;
 
-import Murilo.Wisch.WischGym.domain.Matricula;
+
 import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,4 +19,15 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
     List<Pagamento> findByDataVencimentoBeforeAndStatus(LocalDate data, StatusPagamento status);
 
+    @Query("SELECT COALESCE(SUM(p.valor),0) FROM Pagamento p WHERE p.status = 'PAGO'")
+    BigDecimal totalRecebido();
+
+    @Query("SELECT COALESCE(SUM(p.valor),0) FROM Pagamento p WHERE p.status = 'PENDENTE'")
+    BigDecimal totalPendente();
+
+    @Query("SELECT COALESCE(SUM(p.valor),0) FROM Pagamento p WHERE p.status = 'ATRASADO'")
+    BigDecimal totalAtrasado();
+
+    @Query("SELECT COALESCE(SUM(p.valor),0) FROM Pagamento p WHERE p.status = 'PAGO' AND MONTH(p.dataPagamento) = MONTH(CURRENT_DATE) AND YEAR(p.dataPagamento) = YEAR(CURRENT_DATE)")
+    BigDecimal receitaMes();
 }

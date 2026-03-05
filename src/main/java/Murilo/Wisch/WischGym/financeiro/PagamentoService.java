@@ -93,7 +93,7 @@ public class PagamentoService {
 
     }
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(cron = "0 0 0 * * ?")
     public void gerarCobrancasMensais(){
         List<Matricula> matriculas = matriculaRepository.findByStatus(StatusMatricula.ATIVA);
 
