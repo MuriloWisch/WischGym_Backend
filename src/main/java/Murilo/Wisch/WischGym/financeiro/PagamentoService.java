@@ -19,15 +19,15 @@ public class PagamentoService {
 
     private final PagamentoRepository pagamentoRepository;
     private final MatriculaRepository matriculaRepository;
+    private final AlunoRepository alunoRepository;
 
-    @Autowired
-    private AlunoRepository alunoRepository;
 
     public PagamentoService(PagamentoRepository pagamentoRepository, MatriculaRepository matriculaRepository, AlunoRepository alunoRepository) {
         this.pagamentoRepository = pagamentoRepository;
         this.matriculaRepository = matriculaRepository;
         this.alunoRepository = alunoRepository;
     }
+
     public Pagamento pagar(Long id, PagamentoDTO dto) {
         Pagamento pagamento = pagamentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pagamento não foi encontrado"));
 
@@ -39,7 +39,29 @@ public class PagamentoService {
         pagamento.setDataPagamento(LocalDate.now());
         pagamento.setFormaPagamento(dto.getFormaPagamento());
 
-        return pagamentoRepository.save(pagamento);
+        pagamentoRepository.save(pagamento);
+        verificarInadimplencia(pagamento.getMatricula());
+
+        return pagamento;
+    }
+
+    public void verificarInadimplencia(Matricula matricula){
+
+        boolean possuiAtrasado = pagamentoRepository
+                .existsByMatriculaIdAndStatus(matricula.getId(), StatusPagamento.ATRASADO);
+
+        Aluno aluno = matricula.getAluno();
+
+        if(possuiAtrasado){
+            matricula.setStatus(StatusMatricula.VENCIDA);
+            aluno.setAtivo(false);
+        }else{
+            matricula.setStatus(StatusMatricula.ATIVA);
+            aluno.setAtivo(true);
+        }
+
+        matriculaRepository.save(matricula);
+        alunoRepository.save(aluno);
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
@@ -84,13 +106,12 @@ public class PagamentoService {
 
             pagamento.setStatus(StatusPagamento.ATRASADO);
 
-            Aluno aluno = pagamento.getMatricula().getAluno();
-            aluno.setInadimplente(true);
-            aluno.setAtivo(false);
-            alunoRepository.save(aluno);
-        }
-        pagamentoRepository.saveAll(pagamentosVencidos);
+            verificarInadimplencia(pagamento.getMatricula());
 
+            pagamentoRepository.saveAll(pagamentosVencidos);
+        }
+
+        pagamentoRepository.saveAll(pagamentosVencidos);
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
