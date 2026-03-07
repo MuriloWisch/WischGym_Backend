@@ -3,6 +3,7 @@ package Murilo.Wisch.WischGym.financeiro;
 import Murilo.Wisch.WischGym.domain.Matricula;
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
+import Murilo.Wisch.WischGym.exception.PagamentoNaoEncontradoException;
 import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
@@ -29,7 +30,8 @@ public class PagamentoService {
     }
 
     public Pagamento pagar(Long id, PagamentoDTO dto) {
-        Pagamento pagamento = pagamentoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pagamento não foi encontrado"));
+        Pagamento pagamento = pagamentoRepository.findById(id).orElseThrow(()
+                -> new PagamentoNaoEncontradoException("Pagamento com id " + id +  " não foi encontrado"));
 
         if (pagamento.getStatus() == StatusPagamento.PAGO){
             throw new RuntimeException("Este pagamento ja foi realizado");
