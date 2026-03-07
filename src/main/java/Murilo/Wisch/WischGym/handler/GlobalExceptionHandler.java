@@ -1,11 +1,10 @@
 package Murilo.Wisch.WischGym.handler;
 
-import Murilo.Wisch.WischGym.exception.ErrorResponsee;
+import Murilo.Wisch.WischGym.exception.ApiError;
 import Murilo.Wisch.WischGym.exception.PagamentoNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -15,11 +14,11 @@ import java.time.LocalDateTime;
     public class GlobalExceptionHandler {
 
     @ExceptionHandler(PagamentoNaoEncontradoException.class)
-    public ResponseEntity<ErrorResponsee> handleNotFound(
+    public ResponseEntity<ApiError> handleNotFound(
             PagamentoNaoEncontradoException ex,
             HttpServletRequest request) {
 
-        ErrorResponsee error = new ErrorResponsee(
+        ApiError error = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 "Not Found",
@@ -31,11 +30,11 @@ import java.time.LocalDateTime;
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponsee> handleGenericException(
+    public ResponseEntity<ApiError> handleGenericException(
             Exception ex,
             HttpServletRequest request) {
 
-        ErrorResponsee error = new ErrorResponsee(
+        ApiError error = new ApiError(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",

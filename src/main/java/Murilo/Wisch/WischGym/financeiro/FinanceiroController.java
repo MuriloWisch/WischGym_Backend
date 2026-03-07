@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/financeiro")
+@PreAuthorize("hasRole('ADMIN')")
 public class FinanceiroController {
     private final FinanceiroService financeiroService;
 
