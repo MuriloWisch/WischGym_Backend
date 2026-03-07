@@ -30,4 +30,18 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
     @Query("SELECT COALESCE(SUM(p.valor),0) FROM Pagamento p WHERE p.status = 'PAGO' AND MONTH(p.dataPagamento) = MONTH(CURRENT_DATE) AND YEAR(p.dataPagamento) = YEAR(CURRENT_DATE)")
     BigDecimal receitaMes();
+
+    @Query("""
+SELECT new Murilo.Wisch.WischGym.financeiro.PagamentoAlunoDTO(
+    p.id,
+    p.valor,
+    p.status,
+    p.dataVencimento,
+    p.dataPagamento
+)
+FROM Pagamento p
+WHERE p.matricula.aluno.id = :alunoId
+ORDER BY p.dataVencimento DESC
+""")
+    List<PagamentoAlunoDTO> historicoFinanceiroAluno(Long alunoId);
 }

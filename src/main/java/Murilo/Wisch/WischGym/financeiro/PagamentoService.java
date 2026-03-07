@@ -45,6 +45,10 @@ public class PagamentoService {
         return pagamento;
     }
 
+    public List<PagamentoAlunoDTO> historicoAluno(Long alunoId){
+        return pagamentoRepository.historicoFinanceiroAluno(alunoId);
+    }
+
     public void verificarInadimplencia(Matricula matricula){
 
         boolean possuiAtrasado = pagamentoRepository
