@@ -134,12 +134,16 @@ public class MatriculaService {
 
     private void atualizarStatusAluno(Aluno aluno){
         boolean possuiMatriculaAtiva =
-                matriculaRepository.existsByAlunoAndStatus(aluno.getId(),StatusMatricula.ATIVA);
+                matriculaRepository.existsByAlunoIdAndStatus(aluno.getId(),StatusMatricula.ATIVA);
 
         if (!possuiMatriculaAtiva) {
             aluno.setStatus(StatusAlunos.INADIMPLENTE);
+            aluno.setAtivo(false);
+            aluno.setInadimplente(true);
         }else{
             aluno.setStatus(StatusAlunos.ATIVO);
+            aluno.setAtivo(true);
+            aluno.setInadimplente(false);
         }
         alunoRepository.save(aluno);
     }
