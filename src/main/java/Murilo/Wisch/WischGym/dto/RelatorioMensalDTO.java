@@ -11,8 +11,8 @@ import java.time.YearMonth;
 @AllArgsConstructor
 public class RelatorioMensalDTO {
 
-    private int year;
-    private int month;
+    private int ano;
+    private int mes;
 
     private long totalAlunos;
     private long totalAtivos;
