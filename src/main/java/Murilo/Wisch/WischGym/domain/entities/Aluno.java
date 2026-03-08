@@ -42,6 +42,10 @@ public class Aluno {
 
     private LocalDateTime dataCadastro;
 
+    private boolean ativo = true;
+
+    private boolean inadimplente = false;
+
     @PrePersist
     public void prePersist(){
         this.dataCadastro = LocalDateTime.now();

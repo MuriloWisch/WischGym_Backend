@@ -6,6 +6,9 @@ import Murilo.Wisch.WischGym.domain.entities.Plano;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
 import Murilo.Wisch.WischGym.dto.matricula.MatriculaCreateDTO;
+import Murilo.Wisch.WischGym.financeiro.Pagamento;
+import Murilo.Wisch.WischGym.financeiro.PagamentoRepository;
+import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
@@ -23,11 +26,13 @@ public class MatriculaService {
     private final MatriculaRepository matriculaRepository;
     private final AlunoRepository alunoRepository;
     private final PlanoRepository planoRepository;
+    private final PagamentoRepository pagamentoRepository;
 
-    public MatriculaService(MatriculaRepository matriculaRepository, AlunoRepository alunoRepository, PlanoRepository planoRepository) {
+    public MatriculaService(MatriculaRepository matriculaRepository, AlunoRepository alunoRepository, PlanoRepository planoRepository, PagamentoRepository pagamentoRepository) {
         this.matriculaRepository = matriculaRepository;
         this.alunoRepository = alunoRepository;
         this.planoRepository = planoRepository;
+        this.pagamentoRepository = pagamentoRepository;
     }
 
     public Matricula matricular(MatriculaCreateDTO dto){
@@ -39,7 +44,7 @@ public class MatriculaService {
         Optional<Matricula> matriculaAtiva = matriculaRepository.findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA);
 
         if (matriculaAtiva.isPresent()) {
-            throw new RuntimeException("Aluno ja possui esta matricula ativa");
+            throw new RuntimeException("Aluno ja possui uma matricula ativa");
         }
 
         LocalDate dataInicio = LocalDate.now();
@@ -52,8 +57,20 @@ public class MatriculaService {
         matricula.setDataFim(dataFim);
         matricula.setStatus(StatusMatricula.ATIVA);
         matricula.setValor(plano.getValor());
+        matricula.setProximoPagamento(LocalDate.now().plusMonths(1));
 
-        return matriculaRepository.save(matricula);
+        Matricula matriculaSalva = matriculaRepository.save(matricula);
+
+
+        Pagamento pagamento = new Pagamento();
+        pagamento.setMatricula(matriculaSalva);
+        pagamento.setValor(plano.getValor());
+        pagamento.setDataVencimento(dataInicio.plusMonths(1));
+        pagamento.setStatus(StatusPagamento.PENDENTE);
+
+        pagamentoRepository.save(pagamento);
+
+        return matriculaSalva;
     }
 
     public Matricula buscarPorId(Long id){
@@ -76,6 +93,12 @@ public class MatriculaService {
         Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula não encontrada"));
 
         Plano plano = matricula.getPlano();
+
+        Aluno aluno = matricula.getAluno();
+
+        if(aluno.isInadimplente()){
+            throw new RuntimeException("Aluno inadimplente. Regularize os pagamentos.");
+        }
 
         if (matricula.getStatus() == StatusMatricula.CANCELADA){
             throw new RuntimeException("Não é possivel renovar uma matricula ja cancelada");
@@ -111,12 +134,16 @@ public class MatriculaService {
 
     private void atualizarStatusAluno(Aluno aluno){
         boolean possuiMatriculaAtiva =
-                matriculaRepository.existsByAlunoAndStatus(aluno.getId(),StatusMatricula.ATIVA);
+                matriculaRepository.existsByAlunoIdAndStatus(aluno.getId(),StatusMatricula.ATIVA);
 
         if (!possuiMatriculaAtiva) {
             aluno.setStatus(StatusAlunos.INADIMPLENTE);
+            aluno.setAtivo(false);
+            aluno.setInadimplente(true);
         }else{
             aluno.setStatus(StatusAlunos.ATIVO);
+            aluno.setAtivo(true);
+            aluno.setInadimplente(false);
         }
         alunoRepository.save(aluno);
     }
@@ -141,12 +168,11 @@ public class MatriculaService {
 
          if (matricula.getDataFim().isBefore(hoje)){
 
-             matricula.setStatus(StatusMatricula.ATIVA);
+             matricula.setStatus(StatusMatricula.VENCIDA);
              matriculaRepository.save(matricula);
 
              atualizarStatusAluno(matricula.getAluno());
          }
       }
     }
-
 }
