@@ -39,7 +39,7 @@ public class MatriculaService {
 
         Aluno aluno = alunoRepository.findById(dto.getAlunoId()).orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
 
-        Plano plano = planoRepository.findById(dto.getPlanoId()).orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
+        Plano plano = planoRepository.findById(dto.getPlanoId()).orElseThrow(() -> new RuntimeException("Matricula não encontrado."));
 
         Optional<Matricula> matriculaAtiva = matriculaRepository.findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA);
 

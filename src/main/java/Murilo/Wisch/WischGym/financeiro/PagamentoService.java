@@ -7,8 +7,8 @@ import Murilo.Wisch.WischGym.exception.PagamentoNaoEncontradoException;
 import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
+import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -61,9 +61,13 @@ public class PagamentoService {
         if(possuiAtrasado){
             matricula.setStatus(StatusMatricula.VENCIDA);
             aluno.setAtivo(false);
+            aluno.setStatus(StatusAlunos.INADIMPLENTE);
+            aluno.setInadimplente(true);
         }else{
             matricula.setStatus(StatusMatricula.ATIVA);
             aluno.setAtivo(true);
+            aluno.setStatus(StatusAlunos.ATIVO);
+            aluno.setInadimplente(false);
         }
 
         matriculaRepository.save(matricula);
@@ -114,7 +118,6 @@ public class PagamentoService {
 
             verificarInadimplencia(pagamento.getMatricula());
 
-            pagamentoRepository.saveAll(pagamentosVencidos);
         }
 
         pagamentoRepository.saveAll(pagamentosVencidos);

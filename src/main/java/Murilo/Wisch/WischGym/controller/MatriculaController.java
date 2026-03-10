@@ -27,7 +27,7 @@ public class MatriculaController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("HasAnyRole('ADMIN','PROFESSOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROFESSOR')")
     public ResponseEntity<Matricula> buscar(@PathVariable long id) {
         return ResponseEntity.ok(matriculaService.buscarPorId(id));
     }
@@ -52,7 +52,7 @@ public class MatriculaController {
     }
 
     @GetMapping("/aluno/{alunoId}/ativa")
-    @PreAuthorize("HasAnyRole('ADMIN','PROFESSOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROFESSOR')")
     public ResponseEntity<Matricula> buscarMatriculaAtiva(@PathVariable Long alunoId){
         return ResponseEntity.ok(matriculaService.buscarAtivaPorAluno(alunoId));
     }
