@@ -21,6 +21,4 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     @Query("SELECT COUNT(a) FROM Aluno a WHERE a.ativo = true OR a.status = :status")
     long countActiveByFlagOrStatus(@Param("status") StatusAlunos status);
 
-    @Query("SELECT COUNT(a) FROM Aluno a WHERE a.inadimplente = true OR a.status = :status")
-    long countInadimplenteByFlagOrStatus(@Param("status") StatusAlunos status);
 }
