@@ -38,6 +38,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
 
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
                         .requestMatchers("/auth/**").permitAll()
 
                         .requestMatchers("/planos/**").hasRole("ADMIN")
@@ -60,16 +66,19 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }   
+    }
 
     @Bean
     public AuthenticationProvider authenticationProvider(
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder
     ) {
-        DaoAuthenticationProvider provider =
-                new DaoAuthenticationProvider(userDetailsService);
+
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+
+        provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
+
         return provider;
     }
 
