@@ -38,8 +38,8 @@ public class RelatorioService {
         LocalDateTime end = ym.atEndOfMonth().atTime(23, 59, 59);
 
         long totalAlunos = alunoRepository.count();
-        long totalAtivos = alunoRepository.countActiveByFlagOrStatus(StatusAlunos.ATIVO);
-        long totalInadimplentes = alunoRepository.countInadimplenteByFlagOrStatus(StatusAlunos.INADIMPLENTE);
+        long totalAtivos = alunoRepository.countByAtivoTrue();
+        long totalInadimplentes = alunoRepository.countByInadimplenteTrue();
         long novosAlunosNoMes = alunoRepository.countByDataCadastroBetween(start, end);
 
         return new RelatorioMensalDTO(ym.getYear(), ym.getMonthValue(), totalAlunos, totalAtivos, totalInadimplentes, novosAlunosNoMes);

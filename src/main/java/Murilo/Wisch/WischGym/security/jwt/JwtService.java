@@ -1,49 +1,49 @@
-package Murilo.Wisch.WischGym.security.jwt;
+    package Murilo.Wisch.WischGym.security.jwt;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+    import io.jsonwebtoken.JwtException;
+    import io.jsonwebtoken.Jwts;
+    import io.jsonwebtoken.SignatureAlgorithm;
+    import io.jsonwebtoken.security.Keys;
+    import jakarta.annotation.PostConstruct;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.stereotype.Service;
 
-import java.security.Key;
-import java.util.Date;
+    import java.security.Key;
+    import java.util.Date;
 
-@Service
-public class JwtService {
+    @Service
+    public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secret;
+        @Value("${jwt.secret}")
+        private String secret;
 
-    @Value("${jwt.expiration}")
-    private long expiration;
+        @Value("${jwt.expiration}")
+        private long expiration;
 
-    private Key key;
+        private Key key;
 
-    @PostConstruct
-    public void init() {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
-    }
+        @PostConstruct
+        public void init() {
+            this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        }
 
-    public String generateToken(String email) {
-        return Jwts.builder().setSubject(email).setIssuedAt
-                (new Date()).setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(key, SignatureAlgorithm.HS256).compact();
-    }
+        public String generateToken(String email) {
+            return Jwts.builder().setSubject(email).setIssuedAt
+                    (new Date()).setExpiration(new Date(System.currentTimeMillis() + expiration))
+                    .signWith(key, SignatureAlgorithm.HS256).compact();
+        }
 
-    public String extractEmail(String token){
-        return Jwts.parserBuilder().setSigningKey(key)
-                .build().parseClaimsJws(token).getBody().getSubject();
-    }
+        public String extractEmail(String token){
+            return Jwts.parserBuilder().setSigningKey(key)
+                    .build().parseClaimsJws(token).getBody().getSubject();
+        }
 
-    public boolean isTokenValid(String token) {
-        try {
-            extractEmail(token);
-            return true;
-        }catch (JwtException | IllegalArgumentException e){
-            return false;
+        public boolean isTokenValid(String token) {
+            try {
+                extractEmail(token);
+                return true;
+            }catch (JwtException | IllegalArgumentException e){
+                return false;
+            }
         }
     }
-}

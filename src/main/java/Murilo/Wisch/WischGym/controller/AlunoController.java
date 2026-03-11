@@ -22,6 +22,7 @@ public class AlunoController {
     private final AlunoService alunoService;
     private final PagamentoService pagamentoService;
 
+
     @PostMapping
     public AlunoResponseDTO criar(@RequestBody @Valid AlunoCreateDTO dto){
         return alunoService.criar(dto);
