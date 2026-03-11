@@ -1,5 +1,6 @@
 package Murilo.Wisch.WischGym.controller;
 
+import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoCreateDTO;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoResponseDTO;
 import Murilo.Wisch.WischGym.financeiro.PagamentoAlunoDTO;
@@ -36,6 +37,11 @@ public class AlunoController {
     @GetMapping("/{id}")
     public AlunoResponseDTO buscar(@PathVariable Long id){
         return alunoService.buscarPorId(id);
+    }
+
+    @GetMapping("/buscar")
+    public List<Aluno> buscarPorNome(@RequestParam String nome){
+        return alunoService.buscarPorNome(nome);
     }
 
     @GetMapping("/{id}/pagamentos")

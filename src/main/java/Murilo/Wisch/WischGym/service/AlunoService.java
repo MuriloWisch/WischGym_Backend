@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AlunoService {
@@ -25,6 +27,10 @@ public class AlunoService {
 
         Aluno salvo = alunoRepository.save(aluno);
         return toResponseDTO(salvo);
+    }
+
+    public List<Aluno> buscarPorNome(String nome){
+        return alunoRepository.findByNomeContainingIgnoreCase(nome);
     }
 
     public Page<AlunoResponseDTO> listar(Pageable pageable) {

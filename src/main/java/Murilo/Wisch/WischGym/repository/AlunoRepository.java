@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface AlunoRepository extends JpaRepository<Aluno, Long> {
 
@@ -17,6 +18,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     long countByAtivoTrue();
 
     long countByInadimplenteTrue();
+
+    List<Aluno> findByNomeContainingIgnoreCase(String nome);
 
     @Query("SELECT COUNT(a) FROM Aluno a WHERE a.ativo = true OR a.status = :status")
     long countActiveByFlagOrStatus(@Param("status") StatusAlunos status);
