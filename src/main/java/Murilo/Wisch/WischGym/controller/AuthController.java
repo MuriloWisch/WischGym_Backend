@@ -4,9 +4,11 @@ import Murilo.Wisch.WischGym.domain.RefreshToken;
 import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.dto.auth.AuthResponse;
 import Murilo.Wisch.WischGym.dto.auth.LoginRequest;
+import Murilo.Wisch.WischGym.dto.auth.LogoutRequest;
 import Murilo.Wisch.WischGym.repository.UserRepository;
 import Murilo.Wisch.WischGym.security.jwt.JwtService;
 import Murilo.Wisch.WischGym.service.RefreshTokenService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,5 +55,15 @@ public class AuthController {
                 accessToken,
                 refreshToken.getToken()
         );
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutRequest request){
+
+        refreshTokenService.deleteByToken(
+                request.getRefreshToken()
+        );
+
+        return ResponseEntity.ok("Logout realizado com sucesso");
     }
 }

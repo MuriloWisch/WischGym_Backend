@@ -29,4 +29,14 @@ public class RefreshTokenService {
 
         return repository.save(refreshToken);
     }
+
+    public void deleteByToken(String token){
+
+        RefreshToken refreshToken =
+                repository.findByToken(token)
+                        .orElseThrow(() ->
+                                new RuntimeException("Refresh token não encontrado"));
+
+        repository.delete(refreshToken);
+    }
 }
