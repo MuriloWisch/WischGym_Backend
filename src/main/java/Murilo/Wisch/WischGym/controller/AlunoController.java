@@ -30,18 +30,17 @@ public class AlunoController {
     }
 
     @GetMapping
-    public Page<AlunoResponseDTO> listar (Pageable pageable){
-        return alunoService.listar(pageable);
+    public Page<Aluno> listar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String status,
+            Pageable pageable
+    ){
+        return alunoService.listar(nome, status, pageable);
     }
 
     @GetMapping("/{id}")
     public AlunoResponseDTO buscar(@PathVariable Long id){
         return alunoService.buscarPorId(id);
-    }
-
-    @GetMapping("/buscar")
-    public List<Aluno> buscarPorNome(@RequestParam String nome){
-        return alunoService.buscarPorNome(nome);
     }
 
     @GetMapping("/{id}/pagamentos")

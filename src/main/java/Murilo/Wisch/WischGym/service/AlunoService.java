@@ -1,12 +1,14 @@
 package Murilo.Wisch.WischGym.service;
 
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
+import Murilo.Wisch.WischGym.domain.entities.specification.AlunoSpecification;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoCreateDTO;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoResponseDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,12 +31,28 @@ public class AlunoService {
         return toResponseDTO(salvo);
     }
 
-    public List<Aluno> buscarPorNome(String nome){
-        return alunoRepository.findByNomeContainingIgnoreCase(nome);
+    public Page<Aluno> listar(String nome, Pageable pageable){
+
+        if(nome != null && !nome.isEmpty()){
+            return alunoRepository.findByNomeContainingIgnoreCase(nome, pageable);
+        }
+
+        return alunoRepository.findAll(pageable);
     }
 
-    public Page<AlunoResponseDTO> listar(Pageable pageable) {
-        return alunoRepository.findAll(pageable).map(this::toResponseDTO);
+    public Page<Aluno> listar(String nome, String status, Pageable pageable){
+
+        Specification<Aluno> spec = Specification.where(null);
+
+        if(nome != null && !nome.isEmpty()){
+            spec = spec.and(AlunoSpecification.nomeContem(nome));
+        }
+
+        if(status != null && !status.isEmpty()){
+            spec = spec.and(AlunoSpecification.statusIgual(status));
+        }
+
+        return alunoRepository.findAll(spec, pageable);
     }
 
     public AlunoResponseDTO buscarPorId(Long id){
