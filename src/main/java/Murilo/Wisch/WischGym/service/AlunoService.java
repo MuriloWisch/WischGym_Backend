@@ -72,6 +72,4 @@ public class AlunoService {
         dto.setDataCadastro(aluno.getDataCadastro());
         return dto;
     }
-
-
 }

@@ -1,7 +1,12 @@
 package Murilo.Wisch.WischGym.controller;
 
+import Murilo.Wisch.WischGym.domain.RefreshToken;
+import Murilo.Wisch.WischGym.domain.User;
+import Murilo.Wisch.WischGym.dto.auth.AuthResponse;
 import Murilo.Wisch.WischGym.dto.auth.LoginRequest;
+import Murilo.Wisch.WischGym.repository.UserRepository;
 import Murilo.Wisch.WischGym.security.jwt.JwtService;
+import Murilo.Wisch.WischGym.service.RefreshTokenService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,16 +20,38 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final UserRepository userRepository;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request){
-        Authentication authentication = authenticationManager.authenticate
-                (new UsernamePasswordAuthenticationToken(request.email(),request.password()));
-        return jwtService.generateToken(request.email());
+    public AuthResponse login(@RequestBody LoginRequest request){
+
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.email(),
+                                request.password()
+                        )
+                );
+
+        String accessToken = jwtService.generateToken(request.email());
+
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow();
+
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(
+                accessToken,
+                refreshToken.getToken()
+        );
     }
 }
