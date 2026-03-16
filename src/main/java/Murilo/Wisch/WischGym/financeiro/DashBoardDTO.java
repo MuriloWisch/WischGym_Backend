@@ -10,8 +10,10 @@ import java.math.BigDecimal;
 @Setter
 @AllArgsConstructor
 public class DashBoardDTO {
+
     private BigDecimal recebido;
     private BigDecimal pendente;
     private BigDecimal atrasado;
     private BigDecimal receitaMes;
+
 }
