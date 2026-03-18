@@ -5,6 +5,7 @@ import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.dto.auth.AuthResponse;
 import Murilo.Wisch.WischGym.dto.auth.LoginRequest;
 import Murilo.Wisch.WischGym.dto.auth.LogoutRequest;
+import Murilo.Wisch.WischGym.dto.auth.UserResponse;
 import Murilo.Wisch.WischGym.repository.UserRepository;
 import Murilo.Wisch.WischGym.security.jwt.JwtService;
 import Murilo.Wisch.WischGym.service.RefreshTokenService;
@@ -43,17 +44,24 @@ public class AuthController {
                         )
                 );
 
-        String accessToken = jwtService.generateToken(request.email());
-
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow();
+
+        String accessToken = jwtService.generateToken(user.getEmail());
 
         RefreshToken refreshToken =
                 refreshTokenService.createRefreshToken(user);
 
+        UserResponse userResponse = new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name()
+        );
+
         return new AuthResponse(
                 accessToken,
-                refreshToken.getToken()
+                refreshToken.getToken(),
+                userResponse
         );
     }
 
