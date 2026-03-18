@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -47,15 +50,24 @@ public class AuthController {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow();
 
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            throw new IllegalStateException("Usuário sem role definida");
+        }
+
         String accessToken = jwtService.generateToken(user.getEmail());
 
         RefreshToken refreshToken =
                 refreshTokenService.createRefreshToken(user);
 
+        Set<String> roles = user.getRoles()
+                .stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+
         UserResponse userResponse = new UserResponse(
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name()
+                roles
         );
 
         return new AuthResponse(
