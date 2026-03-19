@@ -1,3 +1,5 @@
+package Murilo.Wisch.WischGym.controller;
+
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoCreateDTO;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoResponseDTO;
@@ -18,7 +20,7 @@ public class AlunoAdminController {
     private final AlunoService alunoService;
 
     @PostMapping
-    public AlunoResponseDTO criar(@RequestBody @Valid AlunoCreateDTO dto){
+    public AlunoResponseDTO criar(@RequestBody @Valid AlunoCreateDTO dto) {
         return alunoService.criar(dto);
     }
 
@@ -27,12 +29,12 @@ public class AlunoAdminController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String status,
             Pageable pageable
-    ){
+    ) {
         return alunoService.listar(nome, status, pageable);
     }
 
     @GetMapping("/{id}")
-    public AlunoResponseDTO buscar(@PathVariable Long id){
+    public AlunoResponseDTO buscar(@PathVariable Long id) {
         return alunoService.buscarPorId(id);
     }
 }

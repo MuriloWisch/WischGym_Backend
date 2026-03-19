@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/professor/alunos")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('PROFESSOR','ADMIN')")
+@PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
 public class AlunoProfessorController {
 
     private final AlunoService alunoService;
@@ -22,12 +22,12 @@ public class AlunoProfessorController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String status,
             Pageable pageable
-    ){
+    ) {
         return alunoService.listar(nome, status, pageable);
     }
 
     @GetMapping("/{id}")
-    public AlunoResponseDTO buscar(@PathVariable Long id){
+    public AlunoResponseDTO buscar(@PathVariable Long id) {
         return alunoService.buscarPorId(id);
     }
 }

@@ -1,12 +1,10 @@
 package Murilo.Wisch.WischGym.controller;
 
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
-import Murilo.Wisch.WischGym.dto.aluno.AlunoCreateDTO;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoResponseDTO;
 import Murilo.Wisch.WischGym.financeiro.PagamentoAlunoDTO;
 import Murilo.Wisch.WischGym.financeiro.PagamentoService;
 import Murilo.Wisch.WischGym.service.AlunoService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,35 +16,29 @@ import java.util.List;
 @RestController
 @RequestMapping("/alunos")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR')")
 public class AlunoController {
 
     private final AlunoService alunoService;
     private final PagamentoService pagamentoService;
-
-
-    @PostMapping
-    public AlunoResponseDTO criar(@RequestBody @Valid AlunoCreateDTO dto){
-        return alunoService.criar(dto);
-    }
 
     @GetMapping
     public Page<Aluno> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String status,
             Pageable pageable
-    ){
+    ) {
         return alunoService.listar(nome, status, pageable);
     }
 
     @GetMapping("/{id}")
-    public AlunoResponseDTO buscar(@PathVariable Long id){
+    public AlunoResponseDTO buscar(@PathVariable Long id) {
         return alunoService.buscarPorId(id);
     }
 
     @GetMapping("/{id}/pagamentos")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<PagamentoAlunoDTO> historicoFinanceiro(@PathVariable Long id){
+    public List<PagamentoAlunoDTO> historicoFinanceiro(@PathVariable Long id) {
         return pagamentoService.historicoAluno(id);
     }
-
 }
