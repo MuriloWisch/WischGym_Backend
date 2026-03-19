@@ -28,15 +28,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(request, response);
             return;
         }
 
-
         String token = authHeader.substring(7);
+
         if (!jwtService.isTokenValid(token)) {
             filterChain.doFilter(request, response);
             return;
@@ -44,12 +45,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String email = jwtService.extractEmail(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null){
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
             UserDetails userDetails = userDetailService.loadUserByUsername(email);
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+            authenticationToken.setDetails(
+                    new org.springframework.security.web.authentication.WebAuthenticationDetailsSource()
+                            .buildDetails(request)
+            );
+
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
-        filterChain.doFilter(request,response);
+
+        filterChain.doFilter(request, response);
     }
 }
