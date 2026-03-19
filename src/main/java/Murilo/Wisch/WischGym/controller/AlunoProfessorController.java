@@ -6,6 +6,7 @@ import Murilo.Wisch.WischGym.service.AlunoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class AlunoProfessorController {
     public Page<Aluno> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String status,
-            Pageable pageable
+            @PageableDefault(size = 10, sort = "nome") Pageable pageable
     ) {
         return alunoService.listar(nome, status, pageable);
     }
