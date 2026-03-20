@@ -19,5 +19,7 @@ public class AlunoResponseDTO {
     private LocalDate dataNascimento;
     private StatusAlunos status;
     private LocalDateTime dataCadastro;
+    private Long professorId;
+    private String professorNome;
 
 }

@@ -1,5 +1,6 @@
 package Murilo.Wisch.WischGym.domain.entities;
 
+import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,6 +20,10 @@ public class Aluno {
     @ManyToOne
     @JoinColumn(name = "plano_id")
     private Plano plano;
+
+    @ManyToOne
+    @JoinColumn(name = "professor_id")
+    private User professor;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

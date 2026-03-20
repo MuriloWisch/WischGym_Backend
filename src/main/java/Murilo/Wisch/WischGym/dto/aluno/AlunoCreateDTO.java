@@ -28,4 +28,6 @@ public class AlunoCreateDTO {
 
     @NotNull
     private LocalDate dataNascimento;
+
+    private Long professorId;
 }
