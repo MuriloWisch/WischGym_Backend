@@ -1,6 +1,7 @@
 package Murilo.Wisch.WischGym.handler;
 
 import Murilo.Wisch.WischGym.exception.ApiError;
+import Murilo.Wisch.WischGym.exception.MatriculaAtivaException;
 import Murilo.Wisch.WischGym.exception.PagamentoNaoEncontradoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -90,5 +91,21 @@ import java.util.Map;
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(body);
+    }
+
+    @ExceptionHandler(MatriculaAtivaException.class)
+    public ResponseEntity<ApiError> handleMatriculaAtiva(
+            MatriculaAtivaException ex,
+            HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 }

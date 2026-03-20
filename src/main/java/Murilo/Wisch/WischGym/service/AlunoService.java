@@ -2,22 +2,25 @@ package Murilo.Wisch.WischGym.service;
 
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.entities.specification.AlunoSpecification;
+import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoCreateDTO;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoResponseDTO;
+import Murilo.Wisch.WischGym.exception.MatriculaAtivaException;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
+import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AlunoService {
 
     private final AlunoRepository alunoRepository;
+    private final MatriculaRepository matriculaRepository;
 
     public AlunoResponseDTO criar(AlunoCreateDTO dto){
         Aluno aluno = Aluno.builder()
@@ -74,10 +77,16 @@ public class AlunoService {
     }
 
     public void deletar(Long id) {
-        if (!alunoRepository.existsById(id)) {
-            throw new RuntimeException("Aluno não encontrado");
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        boolean temMatriculaAtiva = matriculaRepository.existsByAlunoAndStatus(aluno, StatusMatricula.ATIVA);
+
+        if (temMatriculaAtiva) {
+            throw new MatriculaAtivaException("Não é possível excluir um aluno com matrícula ativa.");
         }
-        alunoRepository.deleteById(id);
+
+        alunoRepository.delete(aluno);
     }
 
     private AlunoResponseDTO toResponseDTO(Aluno aluno){
