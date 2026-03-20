@@ -60,6 +60,26 @@ public class AlunoService {
         return toResponseDTO(aluno);
     }
 
+    public AlunoResponseDTO atualizar(Long id, AlunoCreateDTO dto) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        aluno.setNome(dto.getNome());
+        aluno.setCpf(dto.getCpf());
+        aluno.setEmail(dto.getEmail());
+        aluno.setTelefone(dto.getTelefone());
+        aluno.setDataNascimento(dto.getDataNascimento());
+
+        return toResponseDTO(alunoRepository.save(aluno));
+    }
+
+    public void deletar(Long id) {
+        if (!alunoRepository.existsById(id)) {
+            throw new RuntimeException("Aluno não encontrado");
+        }
+        alunoRepository.deleteById(id);
+    }
+
     private AlunoResponseDTO toResponseDTO(Aluno aluno){
         AlunoResponseDTO dto = new AlunoResponseDTO();
         dto.setId(aluno.getId());
