@@ -77,16 +77,15 @@ public class AlunoService {
     }
 
     public void deletar(Long id) {
-        Aluno aluno = alunoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+        if (!alunoRepository.existsById(id)) {
+            throw new RuntimeException("Aluno não encontrado");
+        }
 
-        boolean temMatriculaAtiva = matriculaRepository.existsByAlunoAndStatus(aluno, StatusMatricula.ATIVA);
-
-        if (temMatriculaAtiva) {
+        if (matriculaRepository.existsByAlunoIdAndStatus(id, StatusMatricula.ATIVA)) {
             throw new MatriculaAtivaException("Não é possível excluir um aluno com matrícula ativa.");
         }
 
-        alunoRepository.delete(aluno);
+        alunoRepository.deleteById(id);
     }
 
     private AlunoResponseDTO toResponseDTO(Aluno aluno){
