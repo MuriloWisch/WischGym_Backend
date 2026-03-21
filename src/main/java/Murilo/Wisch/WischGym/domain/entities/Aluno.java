@@ -1,6 +1,7 @@
 package Murilo.Wisch.WischGym.domain.entities;
 
 import Murilo.Wisch.WischGym.domain.User;
+import Murilo.Wisch.WischGym.domain.enums.ObjetivoAluno;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,6 +43,14 @@ public class Aluno {
 
     private LocalDate dataNascimento;
 
+
+    private Double peso;
+
+    private Double altura;
+
+    @Enumerated(EnumType.STRING)
+    private ObjetivoAluno objetivo;
+
     @Enumerated(EnumType.STRING)
     private StatusAlunos status;
 
@@ -58,4 +67,5 @@ public class Aluno {
             this.status = StatusAlunos.ATIVO;
         }
     }
+
 }
