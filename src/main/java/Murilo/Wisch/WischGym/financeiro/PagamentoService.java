@@ -74,33 +74,6 @@ public class PagamentoService {
         alunoRepository.save(aluno);
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void gerarMensalidadesAutomaticas(){
-        List<Matricula> matriculasAtivas = matriculaRepository.findByStatus(StatusMatricula.ATIVA);
-
-        LocalDate hoje = LocalDate.now();
-
-        for (Matricula matricula : matriculasAtivas){
-            LocalDate proximoVencimento = hoje.withDayOfMonth(matricula.getDataInicio().getDayOfMonth());
-
-            if (proximoVencimento.isBefore(hoje)){
-                proximoVencimento = proximoVencimento.plusMonths(1);
-            }
-
-            boolean existePagamento = pagamentoRepository.existsByMatriculaIdAndStatus(matricula.getId(),StatusPagamento.PENDENTE);
-
-            if (!existePagamento){
-                Pagamento pagamento = new Pagamento();
-                pagamento.setMatricula(matricula);
-                pagamento.setValor(matricula.getValor());
-                pagamento.setDataVencimento(proximoVencimento);
-                pagamento.setStatus(StatusPagamento.PENDENTE);
-
-                pagamentoRepository.save(pagamento);
-            }
-        }
-    }
-
     @Transactional
     @Scheduled(cron = "0 0 0 * * ?")
     public void atualizarPagamentosAtrasados() {
