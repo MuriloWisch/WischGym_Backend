@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 public interface AlunoRepository extends JpaRepository<Aluno, Long>, JpaSpecificationExecutor<Aluno> {
@@ -19,6 +20,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long>, JpaSpecific
     long countByStatus(StatusAlunos status);
 
     long countByAtivoTrue();
+
+    Optional<Aluno> findByUserId(Long userId);
 
     long countByInadimplenteTrue();
 

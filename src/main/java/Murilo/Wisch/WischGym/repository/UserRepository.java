@@ -1,6 +1,7 @@
 package Murilo.Wisch.WischGym.repository;
 
 import Murilo.Wisch.WischGym.domain.User;
+import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.enums.Roles;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

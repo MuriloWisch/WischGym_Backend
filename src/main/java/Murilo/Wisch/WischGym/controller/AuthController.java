@@ -122,6 +122,7 @@ public class AuthController {
                     .peso(request.getPeso())
                     .altura(request.getAltura())
                     .objetivo(request.getObjetivo())
+                    .user(user)
                     .build();
 
             if (request.getPlanoId() != null) {

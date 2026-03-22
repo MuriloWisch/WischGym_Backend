@@ -1,5 +1,6 @@
 package Murilo.Wisch.WischGym.domain;
 
+import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.enums.Roles;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,9 @@ public class User {
     private String password;
 
     private boolean active = true;
+
+    @OneToOne(mappedBy = "user")
+    private Aluno aluno;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)

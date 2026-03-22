@@ -21,11 +21,6 @@ public class AlunoAdminController {
 
     private final AlunoService alunoService;
 
-    @PostMapping
-    public AlunoResponseDTO criar(@RequestBody @Valid AlunoCreateDTO dto) {
-        return alunoService.criar(dto);
-    }
-
     @GetMapping
     public Page<Aluno> listar(
             @RequestParam(required = false) String nome,

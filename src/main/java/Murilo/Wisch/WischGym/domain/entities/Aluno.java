@@ -60,6 +60,10 @@ public class Aluno {
 
     private boolean inadimplente = false;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @PrePersist
     public void prePersist(){
         this.dataCadastro = LocalDateTime.now();
