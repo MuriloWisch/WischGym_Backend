@@ -51,22 +51,20 @@ public class PagamentoService {
         return pagamentoRepository.historicoFinanceiroAluno(alunoId);
     }
 
-    public void verificarInadimplencia(Matricula matricula){
-
+    public void verificarInadimplencia(Matricula matricula) {
         boolean possuiAtrasado = pagamentoRepository
                 .existsByMatriculaIdAndStatus(matricula.getId(), StatusPagamento.ATRASADO);
 
         Aluno aluno = matricula.getAluno();
 
-        if(possuiAtrasado){
-            matricula.setStatus(StatusMatricula.VENCIDA);
-            aluno.setAtivo(false);
+        if (possuiAtrasado) {
             aluno.setStatus(StatusAlunos.INADIMPLENTE);
-            aluno.setInadimplente(true);
-        }else{
-            matricula.setStatus(StatusMatricula.ATIVA);
             aluno.setAtivo(true);
+            aluno.setInadimplente(true);
+        } else {
+            matricula.setStatus(StatusMatricula.ATIVA);
             aluno.setStatus(StatusAlunos.ATIVO);
+            aluno.setAtivo(true);
             aluno.setInadimplente(false);
         }
 
