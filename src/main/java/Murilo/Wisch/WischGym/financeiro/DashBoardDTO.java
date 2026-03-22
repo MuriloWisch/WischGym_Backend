@@ -16,4 +16,9 @@ public class DashBoardDTO {
     private BigDecimal atrasado;
     private BigDecimal receitaMes;
 
+    private long totalAlunos;
+    private long totalAtivos;
+    private long totalInativos;
+    private long totalInadimplentes;
+    private long novosNoMes;
 }
