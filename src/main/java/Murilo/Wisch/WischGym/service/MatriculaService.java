@@ -132,15 +132,26 @@ public class MatriculaService {
     }
 
 
-    private void atualizarStatusAluno(Aluno aluno){
+    private void atualizarStatusAluno(Aluno aluno) {
         boolean possuiMatriculaAtiva =
-                matriculaRepository.existsByAlunoIdAndStatus(aluno.getId(),StatusMatricula.ATIVA);
+                matriculaRepository.existsByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA);
+
+        boolean possuiPagamentoAtrasado = possuiMatriculaAtiva &&
+                pagamentoRepository.existsByMatriculaIdAndStatus(
+                        matriculaRepository.findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA)
+                                .map(Matricula::getId).orElse(-1L),
+                        StatusPagamento.ATRASADO
+                );
 
         if (!possuiMatriculaAtiva) {
-            aluno.setStatus(StatusAlunos.INADIMPLENTE);
+            aluno.setStatus(StatusAlunos.INATIVO);
             aluno.setAtivo(false);
+            aluno.setInadimplente(false);
+        } else if (possuiPagamentoAtrasado) {
+            aluno.setStatus(StatusAlunos.INADIMPLENTE);
+            aluno.setAtivo(true);
             aluno.setInadimplente(true);
-        }else{
+        } else {
             aluno.setStatus(StatusAlunos.ATIVO);
             aluno.setAtivo(true);
             aluno.setInadimplente(false);
