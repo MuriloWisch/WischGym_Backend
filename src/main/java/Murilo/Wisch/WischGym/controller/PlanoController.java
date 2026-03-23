@@ -30,13 +30,13 @@ public class PlanoController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','PROFESSOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROFESSOR','ALUNO')")
     public ResponseEntity<List<PlanoResponseDTO>> listar(){
         return ResponseEntity.ok(planoService.listar());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','PROFESSOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROFESSOR','ALUNO')")
     public ResponseEntity<PlanoResponseDTO> buscar(@PathVariable Long id){
         return ResponseEntity.ok(planoService.buscarPorid(id));
     }

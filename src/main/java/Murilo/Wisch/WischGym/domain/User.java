@@ -2,6 +2,7 @@ package Murilo.Wisch.WischGym.domain;
 
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.enums.Roles;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,7 @@ public class User {
     private boolean active = true;
 
     @OneToOne(mappedBy = "user")
+    @JsonIgnore
     private Aluno aluno;
 
     @ElementCollection(fetch = FetchType.EAGER)

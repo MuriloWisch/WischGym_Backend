@@ -3,6 +3,7 @@ package Murilo.Wisch.WischGym.domain.entities;
 import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.domain.enums.ObjetivoAluno;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -62,6 +63,7 @@ public class Aluno {
 
     @OneToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @PrePersist
