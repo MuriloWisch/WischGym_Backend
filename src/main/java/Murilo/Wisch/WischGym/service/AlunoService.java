@@ -17,10 +17,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
-public class AlunoService {
+public class    AlunoService {
 
     private final AlunoRepository alunoRepository;
     private final MatriculaRepository matriculaRepository;
@@ -139,5 +141,12 @@ public class AlunoService {
         }
 
         return dto;
+    }
+
+    public List<AlunoResponseDTO> listarSemProfessor() {
+        return alunoRepository.findAlunosSemProfessor()
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 }

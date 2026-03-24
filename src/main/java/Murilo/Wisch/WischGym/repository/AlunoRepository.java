@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -33,5 +34,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long>, JpaSpecific
     long countActiveByFlagOrStatus(@Param("status") StatusAlunos status);
 
     Optional<Aluno> findByEmail(String email);
+
+    @Query("SELECT a FROM Aluno a WHERE a.professor IS NULL AND a.status = 'ATIVO'")
+    List<Aluno> findAlunosSemProfessor();
 
 }
