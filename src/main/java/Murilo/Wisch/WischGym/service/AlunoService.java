@@ -41,7 +41,7 @@ public class    AlunoService {
             User professor = userRepository.findById(dto.getProfessorId())
                     .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
 
-            if (!professor.getRoles().contains(Roles.PROFESSOR)) {
+            if (professor.getRoles() == null || !professor.getRoles().contains(Roles.PROFESSOR)) {
                 throw new RuntimeException("Usuário informado não é professor");
             }
 
@@ -71,7 +71,7 @@ public class    AlunoService {
 
             aluno.setProfessor(professor);
         } else {
-            aluno.setProfessor(null); // permite desvincular professor
+            aluno.setProfessor(null);
         }
 
         return toResponseDTO(alunoRepository.save(aluno));

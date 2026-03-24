@@ -24,7 +24,7 @@ public class RelatorioService {
             throw new IllegalArgumentException("O mês deve estar entre 1 e 12");
         }
         if (year != null && (year < 1900 || year > 2100)) {
-            throw new IllegalArgumentException("O ano deve estar entre 1900 e 2100");
+            throw new IllegalArgumentException("O ano deve estar entre 1940 e 2050");
         }
 
         YearMonth ym;

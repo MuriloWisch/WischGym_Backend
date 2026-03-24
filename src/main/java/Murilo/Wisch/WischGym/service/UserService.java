@@ -33,6 +33,10 @@ public class UserService {
                 .active(true)
                 .build();
 
+        if (dto.getRole() == null) {
+            throw new RuntimeException("Role é obrigatória");
+        }
+
         return toResponseDTO(userRepository.save(user));
     }
 
