@@ -1,6 +1,6 @@
 package Murilo.Wisch.WischGym.domain.enums;
 
-public enum DivisãoTreino {
+public enum DivisaoTreino {
     FULL_BODY,
     UPPER_LOWER,
     AB,
