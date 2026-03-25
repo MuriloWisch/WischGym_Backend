@@ -4,6 +4,7 @@ import Murilo.Wisch.WischGym.domain.entities.*;
 import Murilo.Wisch.WischGym.dto.treino.ProgressoDTO;
 import Murilo.Wisch.WischGym.dto.treino.RegistrarLogDTO;
 import Murilo.Wisch.WischGym.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +21,12 @@ public class TreinoLogService {
     private final AlunoRepository alunoRepository;
     private final ExercicioLogRepository exercicioLogRepository;
 
+    @Transactional
     public TreinoLog registrarOuAtualizar(String emailAluno, RegistrarLogDTO dto) {
         Aluno aluno = alunoRepository.findByEmail(emailAluno)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
 
-        Treino treino = treinoRepository.findById(dto.getTreinoId())
+        Treino treino = treinoRepository.findByIdComExercicios(dto.getTreinoId())
                 .orElseThrow(() -> new RuntimeException("Treino não encontrado"));
 
         TreinoLog log = treinoLogRepository
@@ -63,6 +65,9 @@ public class TreinoLogService {
                 ? (int) ((concluidos * 100.0) / totalExercicios)
                 : 0;
 
+        if (porcentagem == 0) {
+            throw new RuntimeException("Você precisa concluir pelo menos um exercício.");
+        }
         log.setPorcentagemConcluida(porcentagem);
         log.setConcluido(porcentagem == 100);
 

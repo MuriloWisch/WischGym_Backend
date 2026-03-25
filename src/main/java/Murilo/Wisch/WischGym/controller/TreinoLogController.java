@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/treinos/log")
 @RequiredArgsConstructor
@@ -23,7 +25,14 @@ public class TreinoLogController {
             @RequestBody RegistrarLogDTO dto,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        return ResponseEntity.ok(treinoLogService.registrarOuAtualizar(userDetails.getUsername(), dto));
+        treinoLogService.registrarOuAtualizar(userDetails.getUsername(), dto);
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "success", true,
+                        "message", "Progresso salvo com sucesso"
+                )
+        );
     }
 
     @GetMapping("/historico")
