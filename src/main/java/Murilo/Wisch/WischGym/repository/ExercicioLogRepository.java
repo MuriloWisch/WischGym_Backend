@@ -8,4 +8,5 @@ public interface ExercicioLogRepository extends JpaRepository<ExercicioLog, Long
 
     List<ExercicioLog> findByTreinoLogId(Long treinoLogId);
 
+    void deleteAll(List<ExercicioLog> logs);
 }
