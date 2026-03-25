@@ -58,14 +58,14 @@ public class TreinoService {
     }
 
     public List<TreinoResponseDTO> listarPorAluno(Long alunoId) {
-        return treinoRepository.findByAlunoIdAndAtivoTrue(alunoId)
+        return treinoRepository.findByAlunoIdComExercicios(alunoId)
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
     public List<TreinoResponseDTO> listarPorProfessor(Long professorId) {
-        return treinoRepository.findByProfessorIdAndAtivoTrue(professorId)
+        return treinoRepository.findByProfessorIdComExercicios(professorId)
                 .stream()
                 .map(this::toDTO)
                 .toList();
