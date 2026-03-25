@@ -1,0 +1,120 @@
+package Murilo.Wisch.WischGym.service;
+
+import Murilo.Wisch.WischGym.domain.User;
+import Murilo.Wisch.WischGym.domain.entities.*;
+import Murilo.Wisch.WischGym.domain.enums.GrupoMuscular;
+import Murilo.Wisch.WischGym.dto.treino.*;
+import Murilo.Wisch.WischGym.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class TreinoService {
+
+    private final TreinoRepository treinoRepository;
+    private final ExercicioRepository exercicioRepository;
+    private final AlunoRepository alunoRepository;
+    private final UserRepository userRepository;
+
+    public TreinoResponseDTO criar(String emailProfessor, TreinoCreateDTO dto) {
+        User professor = userRepository.findByEmail(emailProfessor)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
+
+        Aluno aluno = alunoRepository.findById(dto.getAlunoId())
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        Treino treino = Treino.builder()
+                .nome(dto.getNome())
+                .diaTreino(dto.getDiaTreino())
+                .divisao(dto.getDivisao())
+                .professor(professor)
+                .aluno(aluno)
+                .ativo(true)
+                .build();
+
+        List<TreinoExercicio> exercicios = dto.getExercicios().stream()
+                .map(e -> {
+                    Exercicio exercicio = exercicioRepository.findById(e.getExercicioId())
+                            .orElseThrow(() -> new RuntimeException("Exercício não encontrado"));
+
+                    return TreinoExercicio.builder()
+                            .treino(treino)
+                            .exercicio(exercicio)
+                            .series(e.getSeries())
+                            .repeticoes(e.getRepeticoes())
+                            .descanso(e.getDescanso())
+                            .observacao(e.getObservacao())
+                            .ordem(e.getOrdem())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        treino.setExercicios(exercicios);
+        return toDTO(treinoRepository.save(treino));
+    }
+
+    public List<TreinoResponseDTO> listarPorAluno(Long alunoId) {
+        return treinoRepository.findByAlunoIdAndAtivoTrue(alunoId)
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    public List<TreinoResponseDTO> listarPorProfessor(Long professorId) {
+        return treinoRepository.findByProfessorIdAndAtivoTrue(professorId)
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    public TreinoResponseDTO buscarPorId(Long id) {
+        return toDTO(treinoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Treino não encontrado")));
+    }
+
+    public void desativar(Long id) {
+        Treino treino = treinoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Treino não encontrado"));
+        treino.setAtivo(false);
+        treinoRepository.save(treino);
+    }
+
+    private TreinoResponseDTO toDTO(Treino treino) {
+        List<TreinoExercicioResponseDTO> exercicios = treino.getExercicios()
+                .stream()
+                .map(te -> new TreinoExercicioResponseDTO(
+                        te.getId(),
+                        te.getExercicio().getId(),
+                        te.getExercicio().getNome(),
+                        te.getExercicio().getGrupoMuscular(),
+                        te.getExercicio().getGifUrl(),
+                        te.getSeries(),
+                        te.getRepeticoes(),
+                        te.getDescanso(),
+                        te.getObservacao(),
+                        te.getOrdem()
+                ))
+                .sorted((a, b) -> {
+                    if (a.getOrdem() == null) return 1;
+                    if (b.getOrdem() == null) return -1;
+                    return a.getOrdem().compareTo(b.getOrdem());
+                })
+                .toList();
+
+        return new TreinoResponseDTO(
+                treino.getId(),
+                treino.getNome(),
+                treino.getDiaTreino(),
+                treino.getDivisao(),
+                treino.getAluno().getNome(),
+                treino.getProfessor().getNome(),
+                exercicios,
+                treino.getDataCriacao(),
+                treino.isAtivo()
+        );
+    }
+}
