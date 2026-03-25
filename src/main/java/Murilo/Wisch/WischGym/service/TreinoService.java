@@ -117,4 +117,16 @@ public class TreinoService {
                 treino.isAtivo()
         );
     }
+
+    public List<TreinoResponseDTO> listarPorAlunoEmail(String email) {
+        Aluno aluno = alunoRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+        return listarPorAluno(aluno.getId());
+    }
+
+    public List<TreinoResponseDTO> listarPorProfessorEmail(String email) {
+        User professor = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
+        return listarPorProfessor(professor.getId());
+    }
 }
