@@ -30,7 +30,7 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long>, JpaSpecific
 
     Page<Aluno> findByProfessorId(Long professorId, Pageable pageable);
 
-    @Query("SELECT COUNT(a) FROM Aluno a WHERE a.ativo = true OR a.status = :status")
+    @Query("SELECT COUNT(a) FROM Aluno a WHERE a.ativo = true AND a.status = :status")
     long countActiveByFlagOrStatus(@Param("status") StatusAlunos status);
 
     Optional<Aluno> findByEmail(String email);
