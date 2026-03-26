@@ -19,4 +19,12 @@ public interface TreinoLogRepository extends JpaRepository<TreinoLog, Long> {
 
     List<TreinoLog> findByAlunoIdAndDataBetween(Long alunoId, LocalDate inicio, LocalDate fim);
 
+
+    @Query("""
+    SELECT l FROM TreinoLog l
+    JOIN FETCH l.treino t
+    WHERE l.aluno.id = :alunoId
+    ORDER BY l.data DESC
+""")
+    List<TreinoLog> buscarHistoricoComTreino(@Param("alunoId") Long alunoId);
 }

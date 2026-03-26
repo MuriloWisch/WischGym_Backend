@@ -3,6 +3,8 @@ package Murilo.Wisch.WischGym.service;
 import Murilo.Wisch.WischGym.domain.entities.*;
 import Murilo.Wisch.WischGym.dto.treino.ProgressoDTO;
 import Murilo.Wisch.WischGym.dto.treino.RegistrarLogDTO;
+import Murilo.Wisch.WischGym.dto.treino.TreinoLogDTO;
+import Murilo.Wisch.WischGym.dto.treino.TreinoResumoDTO;
 import Murilo.Wisch.WischGym.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -74,10 +76,33 @@ public class TreinoLogService {
         return treinoLogRepository.save(log);
     }
 
-    public List<TreinoLog> historico(String emailAluno) {
-        Aluno aluno = alunoRepository.findByEmail(emailAluno)
+    public List<TreinoLogDTO> historico(String email) {
+
+        Aluno aluno = alunoRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
-        return treinoLogRepository.findByAlunoIdOrderByDataDesc(aluno.getId());
+
+        List<TreinoLog> logs = treinoLogRepository
+                .buscarHistoricoComTreino(aluno.getId());
+
+        return logs.stream().map(log -> {
+
+            Treino t = log.getTreino();
+
+            TreinoResumoDTO treinoDTO = new TreinoResumoDTO();
+            treinoDTO.setId(t.getId());
+            treinoDTO.setNome(t.getNome());
+            treinoDTO.setDivisao(t.getDivisao().name());
+
+            TreinoLogDTO dto = new TreinoLogDTO();
+            dto.setId(log.getId());
+            dto.setData(log.getData());
+            dto.setPorcentagemConcluida(log.getPorcentagemConcluida());
+            dto.setConcluido(log.isConcluido());
+            dto.setTreino(treinoDTO);
+
+            return dto;
+
+        }).toList();
     }
 
     public ProgressoDTO progresso(String emailAluno) {
