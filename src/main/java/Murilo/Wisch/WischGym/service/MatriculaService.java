@@ -5,7 +5,7 @@ import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.entities.Plano;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
-import Murilo.Wisch.WischGym.dto.matricula.MatriculaCreateDTO;
+import Murilo.Wisch.WischGym.dto.matricula.MatriculaDetalheResponse;
 import Murilo.Wisch.WischGym.financeiro.Pagamento;
 import Murilo.Wisch.WischGym.financeiro.PagamentoRepository;
 import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
@@ -13,177 +13,149 @@ import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.scheduling.annotation.Scheduled;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+
 
 @Service
+@RequiredArgsConstructor
 public class MatriculaService {
 
-    private final MatriculaRepository matriculaRepository;
-    private final AlunoRepository alunoRepository;
-    private final PlanoRepository planoRepository;
-    private final PagamentoRepository pagamentoRepository;
+    private final AlunoRepository      alunoRepository;
+    private final PlanoRepository      planoRepository;
+    private final MatriculaRepository  matriculaRepository;
+    private final PagamentoRepository  pagamentoRepository;
 
-    public MatriculaService(MatriculaRepository matriculaRepository, AlunoRepository alunoRepository, PlanoRepository planoRepository, PagamentoRepository pagamentoRepository) {
-        this.matriculaRepository = matriculaRepository;
-        this.alunoRepository = alunoRepository;
-        this.planoRepository = planoRepository;
-        this.pagamentoRepository = pagamentoRepository;
+    private Aluno getAlunoLogado() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return alunoRepository.findByUserEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aluno não encontrado"));
     }
 
-    public Matricula matricular(MatriculaCreateDTO dto){
+    public MatriculaDetalheResponse getMinhaMatricula() {
+        Aluno aluno = getAlunoLogado();
+        return matriculaRepository.findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
+                .map(this::toResponse)
+                .orElse(null);
+    }
 
-        Aluno aluno = alunoRepository.findById(dto.getAlunoId()).orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
+    @Transactional
+    public MatriculaDetalheResponse solicitarMatricula(Long planoId) {
+        Aluno aluno = getAlunoLogado();
+        Plano plano = planoRepository.findById(planoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plano não encontrado"));
 
-        Plano plano = planoRepository.findById(dto.getPlanoId()).orElseThrow(() -> new RuntimeException("Matricula não encontrado."));
+        matriculaRepository.findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
+                .ifPresent(m -> {
+                    if (m.getStatus() == StatusMatricula.ATIVA)
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Já possui matrícula ativa");
+                });
 
-        Optional<Matricula> matriculaAtiva = matriculaRepository.findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA);
-
-        if (matriculaAtiva.isPresent()) {
-            throw new RuntimeException("Aluno ja possui uma matricula ativa");
-        }
-
-        LocalDate dataInicio = LocalDate.now();
-        LocalDate dataFim = dataInicio.plusMonths(plano.getDuracaoMeses());
+        LocalDate hoje = LocalDate.now();
 
         Matricula matricula = new Matricula();
         matricula.setAluno(aluno);
         matricula.setPlano(plano);
-        matricula.setDataInicio(dataInicio);
-        matricula.setDataFim(dataFim);
-        matricula.setStatus(StatusMatricula.ATIVA);
+        matricula.setDataInicio(hoje);
+        matricula.setDataFim(hoje.plusMonths(plano.getDuracaoMeses()));
+        matricula.setProximoPagamento(hoje.plusMonths(1));
         matricula.setValor(plano.getValor());
-        matricula.setProximoPagamento(LocalDate.now().plusMonths(1));
+        matricula.setStatus(StatusMatricula.VENCIDA);
 
-        Matricula matriculaSalva = matriculaRepository.save(matricula);
-
+        matriculaRepository.save(matricula);
 
         Pagamento pagamento = new Pagamento();
-        pagamento.setMatricula(matriculaSalva);
+        pagamento.setMatricula(matricula);
         pagamento.setValor(plano.getValor());
-        pagamento.setDataVencimento(dataInicio.plusMonths(1));
         pagamento.setStatus(StatusPagamento.PENDENTE);
-
+        pagamento.setDataVencimento(hoje.plusDays(3));
         pagamentoRepository.save(pagamento);
 
-        return matriculaSalva;
-    }
-
-    public Matricula buscarPorId(Long id){
-        Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula Não encontrada"));
-
-        atualizarStatusSeNecessario(matricula);
-        return matricula;
-    }
-
-    private void atualizarStatusSeNecessario(Matricula matricula) {
-        if (matricula.getStatus() == StatusMatricula.ATIVA && matricula.getDataFim().isBefore(LocalDate.now())){
-
-            matricula.setStatus(StatusMatricula.VENCIDA);
-            matriculaRepository.save(matricula);
-            atualizarStatusAluno(matricula.getAluno());
-        }
-    }
-
-    public Matricula renovar(Long id){
-        Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula não encontrada"));
-
-        Plano plano = matricula.getPlano();
-
-        Aluno aluno = matricula.getAluno();
-
-        if(aluno.isInadimplente()){
-            throw new RuntimeException("Aluno inadimplente. Regularize os pagamentos.");
-        }
-
-        if (matricula.getStatus() == StatusMatricula.CANCELADA){
-            throw new RuntimeException("Não é possivel renovar uma matricula ja cancelada");
-        }
-
-        LocalDate hoje = LocalDate.now();
-
-        if (matricula.getStatus() == StatusMatricula.ATIVA && matricula.getDataFim().isAfter(hoje)){
-            matricula.setDataFim(matricula.getDataFim().plusMonths(plano.getDuracaoMeses()));
-        } else {
-            matricula.setDataInicio(hoje);
-            matricula.setDataFim(hoje.plusMonths(plano.getDuracaoMeses()));
-        }
-        matricula.setStatus(StatusMatricula.ATIVA);
-        return matriculaRepository.save(matricula);
-
-    }
-
-    public Matricula cancelar(Long id) {
-        Matricula matricula = matriculaRepository.findById(id).orElseThrow(() -> new RuntimeException("Matricula não encontrada"));
-
-        if (matricula.getStatus() == StatusMatricula.CANCELADA){
-            throw new RuntimeException("Esta matricula ja esta cancela");
-        }
-
-        matricula.setStatus(StatusMatricula.CANCELADA);
-        Matricula matriculaSalva = matriculaRepository.save(matricula);
-
-        atualizarStatusAluno(matricula.getAluno());
-        return matriculaSalva;
-    }
-
-
-    private void atualizarStatusAluno(Aluno aluno) {
-        boolean possuiMatriculaAtiva =
-                matriculaRepository.existsByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA);
-
-        boolean possuiPagamentoAtrasado = possuiMatriculaAtiva &&
-                pagamentoRepository.existsByMatriculaIdAndStatus(
-                        matriculaRepository.findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.ATIVA)
-                                .map(Matricula::getId).orElse(-1L),
-                        StatusPagamento.ATRASADO
-                );
-
-        if (!possuiMatriculaAtiva) {
-            aluno.setStatus(StatusAlunos.INATIVO);
-            aluno.setAtivo(false);
-            aluno.setInadimplente(false);
-        } else if (possuiPagamentoAtrasado) {
-            aluno.setStatus(StatusAlunos.INADIMPLENTE);
-            aluno.setAtivo(true);
-            aluno.setInadimplente(true);
-        } else {
-            aluno.setStatus(StatusAlunos.ATIVO);
-            aluno.setAtivo(true);
-            aluno.setInadimplente(false);
-        }
-        alunoRepository.save(aluno);
-    }
-
-    public List<Matricula> listarPorStatus(StatusMatricula status){
-        return matriculaRepository.findByStatus(status);
-    }
-
-    public Matricula buscarAtivaPorAluno(Long alunoId){
-        return matriculaRepository.findByAlunoIdAndStatus(alunoId, StatusMatricula.ATIVA)
-                .orElseThrow(() -> new RuntimeException("Aluno não possui matricula ativa"));
+        return toResponse(matricula);
     }
 
     @Transactional
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void atualizarMatriculasVencidas(){
-     List<Matricula> matriculasAtivas = matriculaRepository.findByStatus(StatusMatricula.ATIVA);
+    public MatriculaDetalheResponse simularPagamento(Long pagamentoId) {
+        Aluno aluno = getAlunoLogado();
 
-     LocalDate hoje = LocalDate.now();
+        Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pagamento não encontrado"));
 
-     for (Matricula matricula : matriculasAtivas){
+        if (!pagamento.getMatricula().getAluno().getId().equals(aluno.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
-         if (matricula.getDataFim().isBefore(hoje)){
+        pagamento.setStatus(StatusPagamento.PAGO);
+        pagamento.setDataPagamento(LocalDate.now());
+        pagamentoRepository.save(pagamento);
 
-             matricula.setStatus(StatusMatricula.VENCIDA);
-             matriculaRepository.save(matricula);
+       Matricula matricula = pagamento.getMatricula();
+        matricula.setStatus(StatusMatricula.ATIVA);
+        matriculaRepository.save(matricula);
 
-             atualizarStatusAluno(matricula.getAluno());
-         }
-      }
+      aluno.setStatus(StatusAlunos.ATIVO);
+        alunoRepository.save(aluno);
+
+        return toResponse(matricula);
+    }
+
+    @Transactional
+    public MatriculaDetalheResponse renovarMatricula() {
+        Aluno aluno = getAlunoLogado();
+
+        Matricula ultima = matriculaRepository
+                .findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhuma matrícula encontrada"));
+
+        if (ultima.getStatus() == StatusMatricula.ATIVA)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Matrícula ainda está ativa");
+
+        Plano plano = ultima.getPlano();
+        LocalDate hoje = LocalDate.now();
+
+        Matricula nova = new Matricula();
+        nova.setAluno(aluno);
+        nova.setPlano(plano);
+        nova.setDataInicio(hoje);
+        nova.setDataFim(hoje.plusMonths(plano.getDuracaoMeses()));
+        nova.setProximoPagamento(hoje.plusMonths(1));
+        nova.setValor(plano.getValor());
+        nova.setStatus(StatusMatricula.VENCIDA);
+
+        matriculaRepository.save(nova);
+
+        Pagamento pagamento = new Pagamento();
+
+        pagamento.setMatricula(nova);
+        pagamento.setValor(plano.getValor());
+        pagamento.setStatus(StatusPagamento.PENDENTE);
+        pagamento.setDataVencimento(hoje.plusDays(3));
+        pagamentoRepository.save(pagamento);
+
+        return toResponse(nova);
+    }
+
+    private MatriculaDetalheResponse toResponse(Matricula m) {
+        var pagamento = pagamentoRepository
+                .findTopByMatriculaIdOrderByIdDesc(m.getId())
+                .orElse(null);
+
+        return new MatriculaDetalheResponse(
+                m.getId(),
+                m.getPlano().getNome(),
+                m.getPlano().getValor(),
+                m.getPlano().getDuracaoMeses(),
+                m.getDataInicio(),
+                m.getDataFim(),
+                m.getStatus(),
+                pagamento != null && pagamento.getStatus() == StatusPagamento.PENDENTE ? pagamento.getId() : null,
+                pagamento != null ? pagamento.getStatus() : null,
+                pagamento != null ? pagamento.getDataPagamento() : null
+        );
     }
 }
