@@ -8,12 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
     List<Pagamento> findByMatriculaId(Long matriculaId);
 
     List<Pagamento> findByStatus(StatusPagamento status);
+
+    Optional<Pagamento> findTopByMatriculaIdOrderByIdDesc(Long matriculaId);
+
+    List<Pagamento> findByMatricula_Aluno_IdAndStatus(Long alunoId, StatusPagamento status);
 
     boolean existsByMatriculaIdAndStatus(Long matriculaId, StatusPagamento status);
 
