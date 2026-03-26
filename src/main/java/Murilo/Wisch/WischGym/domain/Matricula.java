@@ -43,5 +43,4 @@ public class Matricula {
 
     @Column(nullable = false)
     private BigDecimal valor;
-
 }
