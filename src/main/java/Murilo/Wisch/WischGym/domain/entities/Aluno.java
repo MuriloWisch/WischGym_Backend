@@ -44,6 +44,8 @@ public class Aluno {
 
     private LocalDate dataNascimento;
 
+    @Column(columnDefinition = "LONGTEXT")
+    private String fotoPerfil;
 
     private Double peso;
 
