@@ -10,11 +10,11 @@ public record MatriculaResumoDTO(
 
         String nomePlano,
 
-        Double valorPlano,
+        java.math.BigDecimal valorPlano,
 
         LocalDate dataInicio,
 
-        LocalDate dataVencimento,
+        LocalDate dataFim,
 
         StatusMatricula status
 

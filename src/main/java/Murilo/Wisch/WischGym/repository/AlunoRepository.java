@@ -38,4 +38,5 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long>, JpaSpecific
     @Query("SELECT a FROM Aluno a WHERE a.professor IS NULL AND a.status = 'ATIVO'")
     List<Aluno> findAlunosSemProfessor();
 
+    Optional<Aluno> findByUserEmail(String email);
 }
