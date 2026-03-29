@@ -49,4 +49,9 @@ WHERE p.matricula.aluno.id = :alunoId
 ORDER BY p.dataVencimento DESC
 """)
     List<PagamentoAlunoDTO> historicoFinanceiroAluno(Long alunoId);
+
+    Optional<Pagamento> findFirstByMatriculaAlunoIdAndStatusOrderByIdDesc(
+            Long alunoId,
+            StatusPagamento status
+    );
 }
