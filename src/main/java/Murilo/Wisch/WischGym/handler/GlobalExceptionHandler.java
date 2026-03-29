@@ -18,6 +18,23 @@ import java.util.Map;
 @RestControllerAdvice
     public class GlobalExceptionHandler {
 
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex,
+            HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "Forbidden",
+                "Acesso negado",
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
     @ExceptionHandler(PagamentoNaoEncontradoException.class)
     public ResponseEntity<ApiError> handleNotFound(
             PagamentoNaoEncontradoException ex,
