@@ -17,4 +17,9 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
 
     Optional<Matricula> findTopByAlunoIdOrderByDataInicioDesc(Long alunoId);
     List<Matricula> findByAlunoId(Long alunoId);
+
+    Optional<Matricula> findFirstByAlunoIdAndStatusOrderByDataInicioDesc(
+            Long alunoId,
+            StatusMatricula status
+    );
 }
