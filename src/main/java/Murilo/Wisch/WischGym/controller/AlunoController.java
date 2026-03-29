@@ -27,7 +27,7 @@ public class AlunoController {
     public Page<Aluno> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) String status,
-            @PageableDefault(size = 10, sort = "nome") Pageable pageable
+            @PageableDefault(size = 100, sort = "nome") Pageable pageable
     ) {
         return alunoService.listar(nome, status, pageable);
     }

@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,20 +65,22 @@ public class AuthController {
             throw new IllegalStateException("Usuário sem role definida");
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail());
+        List<String> roles = user.getRoles()
+                .stream()
+                .map(Enum::name)
+                .collect(Collectors.toList());
+
+        String accessToken = jwtService.generateToken(user.getEmail(), roles);
 
         RefreshToken refreshToken =
                 refreshTokenService.createRefreshToken(user);
 
-        Set<String> roles = user.getRoles()
-                .stream()
-                .map(Enum::name)
-                .collect(Collectors.toSet());
+        Set<String> rolesSet = new HashSet<>(roles);
 
         UserResponse userResponse = new UserResponse(
                 user.getId(),
                 user.getEmail(),
-                roles
+                rolesSet
         );
 
         return new AuthResponse(
@@ -133,7 +137,11 @@ public class AuthController {
             alunoRepository.save(aluno);
         }
 
-        String accessToken = jwtService.generateToken(user.getEmail());
+        List<String> rolesList = user.getRoles().stream()
+                .map(Enum::name)
+                .collect(Collectors.toList());
+
+        String accessToken = jwtService.generateToken(user.getEmail(), rolesList);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         Set<String> roles = user.getRoles().stream()
