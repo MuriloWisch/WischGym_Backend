@@ -27,34 +27,46 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class MatriculaService {
 
-    private final AlunoRepository      alunoRepository;
-    private final PlanoRepository      planoRepository;
-    private final MatriculaRepository  matriculaRepository;
-    private final PagamentoRepository  pagamentoRepository;
+    private final AlunoRepository     alunoRepository;
+    private final PlanoRepository     planoRepository;
+    private final MatriculaRepository matriculaRepository;
+    private final PagamentoRepository pagamentoRepository;
 
     private Aluno getAlunoLogado() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return alunoRepository.findByUserEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aluno não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Aluno não encontrado"));
     }
+
 
     public MatriculaDetalheResponse getMinhaMatricula() {
         Aluno aluno = getAlunoLogado();
-        return matriculaRepository.findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
+        return matriculaRepository
+                .findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
                 .map(this::toResponse)
                 .orElse(null);
     }
 
     @Transactional
-    public MatriculaDetalheResponse solicitarMatricula(Long planoId) {
+    public MatriculaDetalheResponse iniciarMatricula(Long planoId) {
         Aluno aluno = getAlunoLogado();
         Plano plano = planoRepository.findById(planoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plano não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Plano não encontrado"));
 
         matriculaRepository.findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
                 .ifPresent(m -> {
                     if (m.getStatus() == StatusMatricula.ATIVA)
-                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Já possui matrícula ativa");
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT, "Já possui matrícula ativa");
+                });
+
+        matriculaRepository
+                .findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.AGUARDANDO_PAGAMENTO)
+                .forEach(m -> {
+                    m.setStatus(StatusMatricula.CANCELADA);
+                    matriculaRepository.save(m);
                 });
 
         LocalDate hoje = LocalDate.now();
@@ -66,43 +78,75 @@ public class MatriculaService {
         matricula.setDataFim(hoje.plusMonths(plano.getDuracaoMeses()));
         matricula.setProximoPagamento(hoje.plusMonths(1));
         matricula.setValor(plano.getValor());
-        matricula.setStatus(StatusMatricula.VENCIDA);
+        matricula.setStatus(StatusMatricula.AGUARDANDO_PAGAMENTO);
 
         matriculaRepository.save(matricula);
+        return toResponse(matricula);
+    }
+
+    @Transactional
+    public MatriculaDetalheResponse gerarPagamento(Long matriculaId) {
+        Aluno aluno = getAlunoLogado();
+
+        Matricula matricula = matriculaRepository.findById(matriculaId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Matrícula não encontrada"));
+
+        if (!matricula.getAluno().getId().equals(aluno.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+
+        if (matricula.getStatus() != StatusMatricula.AGUARDANDO_PAGAMENTO)
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Matrícula não está aguardando pagamento");
+
+        var pagamentoExistente = pagamentoRepository
+                .findTopByMatriculaIdAndStatus(matriculaId, StatusPagamento.PENDENTE)
+                .orElse(null);
+
+        if (pagamentoExistente != null) {
+            return toResponse(matricula);
+        }
 
         Pagamento pagamento = new Pagamento();
         pagamento.setMatricula(matricula);
-        pagamento.setValor(plano.getValor());
+        pagamento.setValor(matricula.getValor());
         pagamento.setStatus(StatusPagamento.PENDENTE);
-        pagamento.setDataVencimento(hoje.plusDays(3));
+        pagamento.setDataVencimento(LocalDate.now().plusDays(3));
         pagamentoRepository.save(pagamento);
 
         return toResponse(matricula);
     }
 
+
     @Transactional
-    public MatriculaDetalheResponse simularPagamento(Long pagamentoId) {
+    public MatriculaDetalheResponse confirmarPagamento(Long pagamentoId) {
         Aluno aluno = getAlunoLogado();
 
         Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pagamento não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Pagamento não encontrado"));
 
         if (!pagamento.getMatricula().getAluno().getId().equals(aluno.getId()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+
+        if (pagamento.getStatus() != StatusPagamento.PENDENTE)
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Pagamento não está pendente");
 
         pagamento.setStatus(StatusPagamento.PAGO);
         pagamento.setDataPagamento(LocalDate.now());
         pagamentoRepository.save(pagamento);
 
-       Matricula matricula = pagamento.getMatricula();
+        Matricula matricula = pagamento.getMatricula();
         matricula.setStatus(StatusMatricula.ATIVA);
         matriculaRepository.save(matricula);
 
-      aluno.setStatus(StatusAlunos.ATIVO);
+        aluno.setStatus(StatusAlunos.ATIVO);
         alunoRepository.save(aluno);
 
         return toResponse(matricula);
     }
+
 
     @Transactional
     public MatriculaDetalheResponse renovarMatricula() {
@@ -110,35 +154,28 @@ public class MatriculaService {
 
         Matricula ultima = matriculaRepository
                 .findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nenhuma matrícula encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Nenhuma matrícula encontrada"));
 
         if (ultima.getStatus() == StatusMatricula.ATIVA)
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Matrícula ainda está ativa");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Matrícula ainda está ativa");
 
-        Plano plano = ultima.getPlano();
         LocalDate hoje = LocalDate.now();
 
         Matricula nova = new Matricula();
         nova.setAluno(aluno);
-        nova.setPlano(plano);
+        nova.setPlano(ultima.getPlano());
         nova.setDataInicio(hoje);
-        nova.setDataFim(hoje.plusMonths(plano.getDuracaoMeses()));
+        nova.setDataFim(hoje.plusMonths(ultima.getPlano().getDuracaoMeses()));
         nova.setProximoPagamento(hoje.plusMonths(1));
-        nova.setValor(plano.getValor());
-        nova.setStatus(StatusMatricula.VENCIDA);
+        nova.setValor(ultima.getValor());
+        nova.setStatus(StatusMatricula.AGUARDANDO_PAGAMENTO);
 
         matriculaRepository.save(nova);
-
-        Pagamento pagamento = new Pagamento();
-
-        pagamento.setMatricula(nova);
-        pagamento.setValor(plano.getValor());
-        pagamento.setStatus(StatusPagamento.PENDENTE);
-        pagamento.setDataVencimento(hoje.plusDays(3));
-        pagamentoRepository.save(pagamento);
-
         return toResponse(nova);
     }
+
 
     private MatriculaDetalheResponse toResponse(Matricula m) {
         var pagamento = pagamentoRepository
@@ -153,9 +190,57 @@ public class MatriculaService {
                 m.getDataInicio(),
                 m.getDataFim(),
                 m.getStatus(),
-                pagamento != null && pagamento.getStatus() == StatusPagamento.PENDENTE ? pagamento.getId() : null,
+                pagamento != null && pagamento.getStatus() == StatusPagamento.PENDENTE
+                        ? pagamento.getId() : null,
                 pagamento != null ? pagamento.getStatus() : null,
                 pagamento != null ? pagamento.getDataPagamento() : null
         );
+    }
+
+    @Transactional
+    public MatriculaDetalheResponse assinarMatricula(Long planoId) {
+        Aluno aluno = getAlunoLogado();
+        Plano plano = planoRepository.findById(planoId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Plano não encontrado"));
+
+        matriculaRepository.findTopByAlunoIdOrderByDataInicioDesc(aluno.getId())
+                .ifPresent(m -> {
+                    if (m.getStatus() == StatusMatricula.ATIVA)
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT, "Já possui matrícula ativa");
+                });
+
+        matriculaRepository
+                .findByAlunoIdAndStatus(aluno.getId(), StatusMatricula.AGUARDANDO_PAGAMENTO)
+                .forEach(m -> {
+                    m.setStatus(StatusMatricula.CANCELADA);
+                    matriculaRepository.save(m);
+                });
+
+        LocalDate hoje = LocalDate.now();
+
+        Matricula matricula = new Matricula();
+        matricula.setAluno(aluno);
+        matricula.setPlano(plano);
+        matricula.setDataInicio(hoje);
+        matricula.setDataFim(hoje.plusMonths(plano.getDuracaoMeses()));
+        matricula.setProximoPagamento(hoje.plusMonths(1));
+        matricula.setValor(plano.getValor());
+        matricula.setStatus(StatusMatricula.ATIVA);
+        matriculaRepository.save(matricula);
+
+        Pagamento pagamento = new Pagamento();
+        pagamento.setMatricula(matricula);
+        pagamento.setValor(plano.getValor());
+        pagamento.setStatus(StatusPagamento.PAGO);
+        pagamento.setDataPagamento(hoje);
+        pagamento.setDataVencimento(hoje);
+        pagamentoRepository.save(pagamento);
+
+        aluno.setStatus(StatusAlunos.ATIVO);
+        alunoRepository.save(aluno);
+
+        return toResponse(matricula);
     }
 }

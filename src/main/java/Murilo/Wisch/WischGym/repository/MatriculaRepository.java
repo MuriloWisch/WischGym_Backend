@@ -10,8 +10,6 @@ import java.util.Optional;
 
 public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
 
-    Optional<Matricula> findByAlunoIdAndStatus(Long alunoId, StatusMatricula status);
-
     boolean existsByAlunoIdAndStatus(Long alunoId, StatusMatricula status);
     List<Matricula> findByStatus(StatusMatricula status);
 
@@ -22,4 +20,6 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
             Long alunoId,
             StatusMatricula status
     );
+
+    List<Matricula> findByAlunoIdAndStatus(Long alunoId, StatusMatricula status);
 }

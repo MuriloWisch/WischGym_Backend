@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/matricula")
 @RequiredArgsConstructor
@@ -22,21 +20,33 @@ public class MatriculaController {
         return ResponseEntity.ok(matriculaService.getMinhaMatricula());
     }
 
-    @PostMapping("/solicitar/{planoId}")
+    @PostMapping("/iniciar/{planoId}")
     @PreAuthorize("hasRole('ALUNO')")
-    public ResponseEntity<MatriculaDetalheResponse> solicitar(@PathVariable Long planoId) {
-        return ResponseEntity.ok(matriculaService.solicitarMatricula(planoId));
+    public ResponseEntity<MatriculaDetalheResponse> iniciar(@PathVariable Long planoId) {
+        return ResponseEntity.ok(matriculaService.iniciarMatricula(planoId));
     }
 
-    @PostMapping("/pagar/{pagamentoId}")
+    @PostMapping("/gerar-pagamento/{matriculaId}")
     @PreAuthorize("hasRole('ALUNO')")
-    public ResponseEntity<MatriculaDetalheResponse> pagar(@PathVariable Long pagamentoId) {
-        return ResponseEntity.ok(matriculaService.simularPagamento(pagamentoId));
+    public ResponseEntity<MatriculaDetalheResponse> gerarPagamento(@PathVariable Long matriculaId) {
+        return ResponseEntity.ok(matriculaService.gerarPagamento(matriculaId));
+    }
+
+    @PostMapping("/confirmar-pagamento/{pagamentoId}")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<MatriculaDetalheResponse> confirmarPagamento(@PathVariable Long pagamentoId) {
+        return ResponseEntity.ok(matriculaService.confirmarPagamento(pagamentoId));
     }
 
     @PostMapping("/renovar")
     @PreAuthorize("hasRole('ALUNO')")
     public ResponseEntity<MatriculaDetalheResponse> renovar() {
         return ResponseEntity.ok(matriculaService.renovarMatricula());
+    }
+
+    @PostMapping("/assinar/{planoId}")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<MatriculaDetalheResponse> assinar(@PathVariable Long planoId) {
+        return ResponseEntity.ok(matriculaService.assinarMatricula(planoId));
     }
 }
