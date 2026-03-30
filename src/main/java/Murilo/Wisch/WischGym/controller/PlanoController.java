@@ -43,7 +43,7 @@ public class PlanoController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PlanoResponseDTO> atualizar(@PathVariable Long id, @RequestBody PlanoUpdateDTO dto){
+    public ResponseEntity<PlanoResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid PlanoUpdateDTO dto){
         return ResponseEntity.ok(planoService.atualizar(id, dto));
     }
 

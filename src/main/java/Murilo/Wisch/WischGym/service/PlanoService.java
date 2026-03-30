@@ -62,13 +62,13 @@ public class PlanoService {
     public PlanoResponseDTO atualizar(Long id, PlanoUpdateDTO dto){
         Plano plano = buscarEntityPorId(id);
 
-        plano.setNome(dto.nome());
-        plano.setDescricao(dto.descricao());
-        plano.setValor(dto.valor());
-        plano.setDuracaoMeses(dto.duracaoMeses());
+        plano.setNome(dto.getNome());
+        plano.setDescricao(dto.getDescricao());
+        plano.setValor(dto.getValor());
+        plano.setDuracaoMeses(dto.getDuracaoMeses());
 
-        if(dto.ativo() != null){
-            plano.setAtivo(dto.ativo());
+        if(dto.getAtivo() != null){
+            plano.setAtivo(dto.getAtivo());
         }
 
         Plano salvo = planoRepository.save(plano);
