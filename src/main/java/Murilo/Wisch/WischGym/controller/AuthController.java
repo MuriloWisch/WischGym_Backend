@@ -10,7 +10,10 @@ import Murilo.Wisch.WischGym.repository.PlanoRepository;
 import Murilo.Wisch.WischGym.repository.UserRepository;
 import Murilo.Wisch.WischGym.security.jwt.JwtService;
 import Murilo.Wisch.WischGym.service.RefreshTokenService;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -70,7 +73,7 @@ public class AuthController {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        String accessToken = jwtService.generateToken(user.getEmail(), roles);
+        String accessToken = jwtService.generateToken(user.getEmail(), roles, user.getId());
 
         RefreshToken refreshToken =
                 refreshTokenService.createRefreshToken(user);
@@ -90,8 +93,11 @@ public class AuthController {
         );
     }
 
+    @Autowired
+    private Validator validator;
+
     @PostMapping("/registro")
-    public ResponseEntity<AuthResponse> registro(@RequestBody @Valid RegistroRequest request) {
+    public ResponseEntity<?> registro(@RequestBody RegistroRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email já cadastrado");
@@ -134,6 +140,14 @@ public class AuthController {
                         .ifPresent(aluno::setPlano);
             }
 
+            Set<ConstraintViolation<Aluno>> violations = validator.validate(aluno);
+            if (!violations.isEmpty()) {
+                List<String> erros = violations.stream()
+                        .map(ConstraintViolation::getMessage)
+                        .toList();
+                return ResponseEntity.badRequest().body(erros);
+            }
+
             alunoRepository.save(aluno);
         }
 
@@ -141,7 +155,7 @@ public class AuthController {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 
-        String accessToken = jwtService.generateToken(user.getEmail(), rolesList);
+        String accessToken = jwtService.generateToken(user.getEmail(), rolesList, user.getId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         Set<String> roles = user.getRoles().stream()

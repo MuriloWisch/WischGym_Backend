@@ -27,8 +27,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
+
+    @Column
+    private String googleId;
 
     private boolean active = true;
 
