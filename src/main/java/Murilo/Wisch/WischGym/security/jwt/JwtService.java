@@ -28,10 +28,11 @@
             this.key = Keys.hmacShaKeyFor(secret.getBytes());
         }
 
-        public String generateToken(String email, List<String> roles) {
+        public String generateToken(String email, List<String> roles, Long userId) {
             return Jwts.builder()
                     .setSubject(email)
                     .claim("roles", roles)
+                    .claim("id", userId)
                     .setIssuedAt(new Date())
                     .setExpiration(new Date(System.currentTimeMillis() + expiration))
                     .signWith(key, SignatureAlgorithm.HS256)
