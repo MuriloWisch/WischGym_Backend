@@ -5,6 +5,7 @@ import Murilo.Wisch.WischGym.domain.enums.ObjetivoAluno;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -34,10 +35,11 @@ public class Aluno {
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 11)
+    @Size(min = 11, max = 11, message = "CPF deve ter exatamente 11 caracteres")
     private String cpf;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
 
     private String telefone;

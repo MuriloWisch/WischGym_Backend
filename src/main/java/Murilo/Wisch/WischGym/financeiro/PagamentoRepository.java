@@ -54,4 +54,6 @@ ORDER BY p.dataVencimento DESC
             Long alunoId,
             StatusPagamento status
     );
+
+    Optional<Pagamento> findTopByMatriculaIdAndStatus(Long matriculaId, StatusPagamento status);
 }
