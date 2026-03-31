@@ -8,6 +8,7 @@ import Murilo.Wisch.WischGym.dto.aluno.AlunoPerfilUpdateRequest;
 import Murilo.Wisch.WischGym.dto.aluno.MatriculaResumoDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -59,6 +60,7 @@ public class AlunoPerfilService {
         );
     }
 
+    @Transactional
     public AlunoPerfilResponse updatePerfil(AlunoPerfilUpdateRequest request) {
         Aluno aluno = getAlunoLogado();
 

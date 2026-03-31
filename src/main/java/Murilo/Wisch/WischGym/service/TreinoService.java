@@ -2,7 +2,7 @@ package Murilo.Wisch.WischGym.service;
 
 import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.domain.entities.*;
-import Murilo.Wisch.WischGym.domain.enums.GrupoMuscular;
+
 import Murilo.Wisch.WischGym.dto.treino.*;
 import Murilo.Wisch.WischGym.repository.*;
 import lombok.RequiredArgsConstructor;

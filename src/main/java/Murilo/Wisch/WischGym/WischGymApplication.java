@@ -22,6 +22,5 @@ public class WischGymApplication {
 	@PostConstruct
 	public void gerarSenha() {
 		String hash = passwordEncoder.encode("123456");
-		//System.out.println("HASH GERADO AGORA => " + hash);
 	}
 }

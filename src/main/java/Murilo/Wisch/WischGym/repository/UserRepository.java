@@ -16,4 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r = :role")
     List<User> findByRole(@Param("role") Roles role);
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r = :role")
+    List<User> findByRolesContaining(@Param("role") Roles role);
 }

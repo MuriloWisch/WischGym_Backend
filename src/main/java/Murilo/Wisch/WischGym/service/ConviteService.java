@@ -5,6 +5,7 @@ import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.entities.Convite;
 import Murilo.Wisch.WischGym.domain.enums.Roles;
 import Murilo.Wisch.WischGym.domain.enums.StatusConvite;
+import Murilo.Wisch.WischGym.domain.enums.TipoNotificacao;
 import Murilo.Wisch.WischGym.dto.convite.ConviteEnviarDTO;
 import Murilo.Wisch.WischGym.dto.convite.ConviteResponseDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
@@ -23,6 +24,8 @@ public class ConviteService {
     private final ConviteRepository conviteRepository;
     private final UserRepository userRepository;
     private final AlunoRepository alunoRepository;
+    private final NotificacaoService notificacaoService;
+
 
     public ConviteResponseDTO enviar(String emailProfessor, ConviteEnviarDTO dto) {
 
@@ -54,7 +57,15 @@ public class ConviteService {
         convite.setStatus(StatusConvite.PENDENTE);
         convite.setDataCriacao(LocalDateTime.now());
 
-        return toDTO(conviteRepository.save(convite));
+        Convite salvo = (conviteRepository.save(convite));
+
+        notificacaoService.criar(
+                aluno.getUser(),
+                TipoNotificacao.CONVITE_RECEBIDO,
+                "Convite recebido",
+                "O professor " + professor.getNome() + " te convidou para treinar juntos."
+        );
+        return toDTO(salvo);
     }
 
     public List<ConviteResponseDTO> listarRecebidos(String emailAluno) {

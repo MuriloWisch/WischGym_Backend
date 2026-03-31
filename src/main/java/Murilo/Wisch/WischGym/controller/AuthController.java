@@ -4,15 +4,18 @@ import Murilo.Wisch.WischGym.domain.RefreshToken;
 import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.enums.Roles;
+import Murilo.Wisch.WischGym.domain.enums.TipoNotificacao;
 import Murilo.Wisch.WischGym.dto.auth.*;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
 import Murilo.Wisch.WischGym.repository.UserRepository;
 import Murilo.Wisch.WischGym.security.jwt.JwtService;
+import Murilo.Wisch.WischGym.service.NotificacaoService;
 import Murilo.Wisch.WischGym.service.RefreshTokenService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
+@AllArgsConstructor
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -39,16 +43,9 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final AlunoRepository alunoRepository;
     private final PlanoRepository planoRepository;
+    private final NotificacaoService notificacaoService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, RefreshTokenService refreshTokenService, UserRepository userRepository, PasswordEncoder passwordEncoder, AlunoRepository alunoRepository, PlanoRepository planoRepository) {
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-        this.refreshTokenService = refreshTokenService;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.alunoRepository = alunoRepository;
-        this.planoRepository = planoRepository;
-    }
+
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request){
@@ -149,6 +146,24 @@ public class AuthController {
             }
 
             alunoRepository.save(aluno);
+
+            userRepository.findByRolesContaining(Roles.ADMIN).forEach(admin ->
+                    notificacaoService.criar(
+                            admin,
+                            TipoNotificacao.NOVO_ALUNO,
+                            "Novo aluno cadastrado",
+                            "O aluno " + request.getNome() + " acabou de se cadastrar na plataforma."
+                    )
+            );
+
+            userRepository.findByRolesContaining(Roles.PROFESSOR).forEach(professor ->
+                    notificacaoService.criar(
+                            professor,
+                            TipoNotificacao.NOVO_ALUNO,
+                            "Novo aluno cadastrado",
+                            "O aluno " + request.getNome() + " acabou de se cadastrar na plataforma."
+                    )
+            );
         }
 
         List<String> rolesList = user.getRoles().stream()
@@ -164,7 +179,11 @@ public class AuthController {
 
         UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(), roles);
 
-        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken.getToken(), userResponse));
+        return ResponseEntity.ok(new AuthResponse(
+                accessToken,
+                refreshToken.getToken(),
+                userResponse
+        ));
     }
 
     @PostMapping("/logout")
