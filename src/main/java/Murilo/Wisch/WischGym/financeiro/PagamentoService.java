@@ -9,8 +9,11 @@ import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -114,5 +117,40 @@ public class PagamentoService {
                 matriculaRepository.save(matricula);
             }
         }
+    }
+
+    public List<PagamentoResponse> getMeusPagamentos() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Aluno aluno = alunoRepository.findByUserEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Aluno não encontrado"));
+
+        return pagamentoRepository
+                .findByMatricula_AlunoIdOrderByIdDesc(aluno.getId())
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<PagamentoResponse> getTodosPagamentos() {
+        return pagamentoRepository
+                .findAllByOrderByIdDesc()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private PagamentoResponse toResponse(Pagamento p) {
+        return new PagamentoResponse(
+                p.getId(),
+                p.getMatricula().getPlano().getNome(),
+                p.getValor(),
+                p.getStatus(),
+                p.getDataPagamento(),
+                p.getDataVencimento(),
+                p.getMatricula().getDataInicio(),
+                p.getMatricula().getDataFim(),
+                p.getMatricula().getAluno().getNome()
+        );
     }
 }

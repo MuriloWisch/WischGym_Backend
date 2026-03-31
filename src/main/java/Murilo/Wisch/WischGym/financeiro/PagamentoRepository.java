@@ -16,6 +16,10 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
     List<Pagamento> findByStatus(StatusPagamento status);
 
+    List<Pagamento> findByMatricula_AlunoIdOrderByIdDesc(Long alunoId);
+
+    List<Pagamento> findAllByOrderByIdDesc();
+
     Optional<Pagamento> findTopByMatriculaIdOrderByIdDesc(Long matriculaId);
 
     List<Pagamento> findByMatricula_Aluno_IdAndStatus(Long alunoId, StatusPagamento status);
