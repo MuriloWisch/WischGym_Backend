@@ -1,5 +1,6 @@
 package Murilo.Wisch.WischGym.service;
 
+import Murilo.Wisch.WischGym.config.EmailDomainValidator;
 import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.entities.specification.AlunoSpecification;
@@ -16,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,8 +31,13 @@ public class AlunoService {
     private final AlunoRepository alunoRepository;
     private final MatriculaRepository matriculaRepository;
     private final UserRepository userRepository;
+    private final EmailDomainValidator emailDomainValidator;
 
     public AlunoResponseDTO criar(AlunoCreateDTO dto) {
+        if (!emailDomainValidator.isDominioValido(dto.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email inválido. Use um email real.");
+        }
+
         Aluno aluno = Aluno.builder()
                 .nome(dto.getNome())
                 .cpf(dto.getCpf())
@@ -55,6 +63,12 @@ public class AlunoService {
     public AlunoResponseDTO atualizar(Long id, AlunoCreateDTO dto) {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+
+        if (!aluno.getEmail().equals(dto.getEmail())) {
+            if (!emailDomainValidator.isDominioValido(dto.getEmail())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email inválido. Use um email real.");
+            }
+        }
 
         aluno.setNome(dto.getNome());
         aluno.setCpf(dto.getCpf());
