@@ -1,14 +1,17 @@
 package Murilo.Wisch.WischGym.controller;
 
-import Murilo.Wisch.WischGym.dto.aluno.AlunoFotoRequest;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoPerfilResponse;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoPerfilUpdateRequest;
 import Murilo.Wisch.WischGym.service.AlunoPerfilService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/aluno/perfil")
@@ -31,12 +34,12 @@ public class AlunoPerfilController {
         return ResponseEntity.ok(alunoPerfilService.updatePerfil(request));
     }
 
-    @PostMapping("/foto")
+    @PostMapping(value = "/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ALUNO')")
-    public ResponseEntity<Void> updateFoto(
-            @Valid @RequestBody AlunoFotoRequest request
+    public ResponseEntity<Map<String, String>> updateFoto(
+            @RequestParam("file") MultipartFile file
     ) {
-        alunoPerfilService.updateFoto(request);
-        return ResponseEntity.noContent().build();
+        String url = alunoPerfilService.updateFoto(file);
+        return ResponseEntity.ok(Map.of("url", url));
     }
 }

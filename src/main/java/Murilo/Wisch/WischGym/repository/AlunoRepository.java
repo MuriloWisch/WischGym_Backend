@@ -2,10 +2,12 @@ package Murilo.Wisch.WischGym.repository;
 
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -41,4 +43,9 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long>, JpaSpecific
     List<Aluno> findAlunosSemProfessor();
 
     Optional<Aluno> findByUserEmail(String email);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Aluno a SET a.fotoPerfil = :url WHERE a.id = :id")
+    void updateFotoPerfil(@Param("id") Long id, @Param("url") String url);
 }

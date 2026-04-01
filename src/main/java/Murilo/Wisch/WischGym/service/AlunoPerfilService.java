@@ -2,20 +2,25 @@ package Murilo.Wisch.WischGym.service;
 
 import Murilo.Wisch.WischGym.domain.Matricula;
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
-import Murilo.Wisch.WischGym.dto.aluno.AlunoFotoRequest;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoPerfilResponse;
 import Murilo.Wisch.WischGym.dto.aluno.AlunoPerfilUpdateRequest;
 import Murilo.Wisch.WischGym.dto.aluno.MatriculaResumoDTO;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.Comparator;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ public class AlunoPerfilService {
 
     private final AlunoRepository alunoRepository;
     private final MatriculaRepository matriculaRepository;
+    private final Cloudinary cloudinary;
 
     private Aluno getAlunoLogado() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -72,14 +78,38 @@ public class AlunoPerfilService {
         return getPerfil();
     }
 
-    public void updateFoto(AlunoFotoRequest request) {
-        Aluno aluno = getAlunoLogado();
 
-        if (request.fotoPerfil().length() > 3_500_000) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Foto muito grande. Máximo 2MB.");
+    public String updateFoto(MultipartFile file) {
+
+        Aluno alunoLogado = getAlunoLogado();
+
+        try {
+            Map<?, ?> result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "wischgym/perfil",
+                            "public_id", "aluno_" + alunoLogado.getId(),
+                            "overwrite", true,
+                            "transformation", new Transformation()
+                                    .width(400)
+                                    .height(400)
+                                    .crop("fill")
+                                    .gravity("face")
+                    )
+            );
+
+            String url = result.get("secure_url").toString();
+
+            alunoRepository.updateFotoPerfil(alunoLogado.getId(), url);
+
+            return url;
+
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Erro ao fazer upload da foto.",
+                    e
+            );
         }
-
-        aluno.setFotoPerfil(request.fotoPerfil());
-        alunoRepository.save(aluno);
     }
 }
