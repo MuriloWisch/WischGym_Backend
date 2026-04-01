@@ -45,6 +45,16 @@ public class TreinoController {
         return ResponseEntity.ok(treinoService.listarPorProfessorEmail(userDetails.getUsername()));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
+    public ResponseEntity<TreinoResponseDTO> editar(
+            @PathVariable Long id,
+            @RequestBody @Valid TreinoCreateDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(treinoService.editar(id, userDetails.getUsername(), dto));
+    }
+
     @GetMapping("/aluno/{alunoId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PROFESSOR')")
     public ResponseEntity<List<TreinoResponseDTO>> treinosDoAluno(@PathVariable Long alunoId) {

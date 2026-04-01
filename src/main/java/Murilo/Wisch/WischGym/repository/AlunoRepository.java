@@ -18,6 +18,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long>, JpaSpecific
 
     long countByDataCadastroBetween(LocalDateTime start, LocalDateTime end);
 
+    List<Aluno> findByProfessorId(Long professorId);
+
     long countByStatus(StatusAlunos status);
 
     long countByAtivoTrue();

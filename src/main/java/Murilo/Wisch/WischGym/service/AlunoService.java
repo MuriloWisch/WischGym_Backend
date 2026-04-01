@@ -23,7 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class    AlunoService {
+public class AlunoService {
 
     private final AlunoRepository alunoRepository;
     private final MatriculaRepository matriculaRepository;
@@ -117,6 +117,16 @@ public class    AlunoService {
 
         return alunoRepository.findByProfessorId(professor.getId(), pageable)
                 .map(this::toResponseDTO);
+    }
+
+    public List<AlunoResponseDTO> listarTodosPorProfessor(String email) {
+        User professor = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Professor não encontrado"));
+
+        return alunoRepository.findByProfessorId(professor.getId())
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 
     public AlunoResponseDTO buscarPorId(Long id) {

@@ -33,13 +33,19 @@ public class AlunoProfessorController {
         return alunoService.listarPorProfessor(userDetails.getUsername(), nome, status, pageable);
     }
 
-    @GetMapping("/{id}")
-    public AlunoResponseDTO buscar(@PathVariable Long id) {
-        return alunoService.buscarPorId(id);
-    }
-
     @GetMapping("/disponiveis")
     public ResponseEntity<List<AlunoResponseDTO>> alunosDisponiveis() {
         return ResponseEntity.ok(alunoService.listarSemProfessor());
+    }
+
+    @GetMapping("/todos")
+    public ResponseEntity<List<AlunoResponseDTO>> listarTodos(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(alunoService.listarTodosPorProfessor(userDetails.getUsername()));
+    }
+
+    @GetMapping("/{id}")
+    public AlunoResponseDTO buscar(@PathVariable Long id) {
+        return alunoService.buscarPorId(id);
     }
 }
