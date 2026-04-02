@@ -35,8 +35,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                // .cors(Customizer.withDefaults()) fará o Spring buscar o bean
-                // 'corsConfigurationSource' definido na sua classe CorsConfig.java
+
                 .cors(Customizer.withDefaults())
 
                 .sessionManagement(sess ->
