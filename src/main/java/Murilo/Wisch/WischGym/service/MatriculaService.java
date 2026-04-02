@@ -3,8 +3,10 @@ package Murilo.Wisch.WischGym.service;
 import Murilo.Wisch.WischGym.domain.Matricula;
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
 import Murilo.Wisch.WischGym.domain.entities.Plano;
+import Murilo.Wisch.WischGym.domain.enums.Roles;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
+import Murilo.Wisch.WischGym.domain.enums.TipoNotificacao;
 import Murilo.Wisch.WischGym.dto.matricula.MatriculaDetalheResponse;
 import Murilo.Wisch.WischGym.financeiro.Pagamento;
 import Murilo.Wisch.WischGym.financeiro.PagamentoRepository;
@@ -12,6 +14,7 @@ import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.repository.PlanoRepository;
+import Murilo.Wisch.WischGym.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +34,8 @@ public class MatriculaService {
     private final PlanoRepository     planoRepository;
     private final MatriculaRepository matriculaRepository;
     private final PagamentoRepository pagamentoRepository;
+    private final NotificacaoService  notificacaoService;
+    private final UserRepository userRepository;
 
     private Aluno getAlunoLogado() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -241,6 +246,24 @@ public class MatriculaService {
         aluno.setStatus(StatusAlunos.ATIVO);
         alunoRepository.save(aluno);
 
+
+        userRepository.findByRolesContaining(Roles.ADMIN).forEach(admin ->
+                notificacaoService.criar(
+                        admin,
+                        TipoNotificacao.PAGAMENTO_REALIZADO,
+                        "Pagamento realizado",
+                        "O aluno " + aluno.getNome() + " realizou o pagamento do plano " + plano.getNome() + "."
+                )
+        );
+
+        notificacaoService.criar(
+                aluno.getUser(),
+                TipoNotificacao.MATRICULA_ATIVADA,
+                "Matrícula ativada",
+                "Sua matrícula no plano " + plano.getNome() + " foi ativada com sucesso. Bons treinos!"
+        );
+
         return toResponse(matricula);
+
     }
 }

@@ -2,13 +2,18 @@ package Murilo.Wisch.WischGym.financeiro;
 
 import Murilo.Wisch.WischGym.domain.Matricula;
 import Murilo.Wisch.WischGym.domain.entities.Aluno;
+import Murilo.Wisch.WischGym.domain.enums.Roles;
 import Murilo.Wisch.WischGym.domain.enums.StatusMatricula;
+import Murilo.Wisch.WischGym.domain.enums.TipoNotificacao;
 import Murilo.Wisch.WischGym.exception.PagamentoNaoEncontradoException;
 import Murilo.Wisch.WischGym.financeiro.enums.StatusPagamento;
 import Murilo.Wisch.WischGym.repository.AlunoRepository;
 import Murilo.Wisch.WischGym.repository.MatriculaRepository;
 import Murilo.Wisch.WischGym.domain.enums.StatusAlunos;
+import Murilo.Wisch.WischGym.repository.UserRepository;
+import Murilo.Wisch.WischGym.service.NotificacaoService;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,18 +24,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class PagamentoService {
 
     private final PagamentoRepository pagamentoRepository;
     private final MatriculaRepository matriculaRepository;
     private final AlunoRepository alunoRepository;
+    private final NotificacaoService notificacaoService;
+    private final UserRepository userRepository;
 
 
-    public PagamentoService(PagamentoRepository pagamentoRepository, MatriculaRepository matriculaRepository, AlunoRepository alunoRepository) {
-        this.pagamentoRepository = pagamentoRepository;
-        this.matriculaRepository = matriculaRepository;
-        this.alunoRepository = alunoRepository;
-    }
 
     public Pagamento pagar(Long id, PagamentoDTO dto) {
         Pagamento pagamento = pagamentoRepository.findById(id).orElseThrow(()
@@ -47,6 +50,26 @@ public class PagamentoService {
         pagamentoRepository.save(pagamento);
         verificarInadimplencia(pagamento.getMatricula());
 
+        Aluno aluno = pagamento.getMatricula().getAluno();
+        if (aluno.getUser() != null) {
+            notificacaoService.criar(
+                    aluno.getUser(),
+                    TipoNotificacao.PAGAMENTO_REALIZADO,
+                    "Pagamento confirmado",
+                    "Seu pagamento de R$ " + pagamento.getValor() + " referente ao plano " +
+                            pagamento.getMatricula().getPlano().getNome() + " foi confirmado."
+            );
+        }
+
+        userRepository.findByRolesContaining(Roles.ADMIN).forEach(admin ->
+                notificacaoService.criar(
+                        admin,
+                        TipoNotificacao.PAGAMENTO_REALIZADO,
+                        "Pagamento recebido",
+                        "O aluno " + aluno.getNome() + " realizou o pagamento de R$ " +
+                                pagamento.getValor() + "."
+                )
+        );
         return pagamento;
     }
 
