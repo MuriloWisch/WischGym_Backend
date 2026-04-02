@@ -34,7 +34,6 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
-                // O CORS deve vir primeiro para responder ao Preflight (OPTIONS)
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
 
@@ -44,7 +43,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Garante liberação do CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -66,7 +65,6 @@ public class SecurityConfig {
 
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // Se chegar aqui em uma rota pública, pode ser erro de lógica no filtro
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
                             response.getWriter().write("{\"error\": \"Acesso negado ou Token inválido\"}");

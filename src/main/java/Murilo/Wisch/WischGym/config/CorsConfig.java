@@ -18,18 +18,28 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
+        // setAllowedOriginPatterns é mais flexível que setAllowedOrigins
+        // O "*" permite que qualquer subdomínio da Vercel funcione (Previews e Produção)
+        config.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
-                "https://wischgym-gueth6sq7-murilowischs-projects.vercel.app"
+                "https://wischgym*.vercel.app"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        // Adicionando cabeçalhos comuns que o Angular costuma enviar
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
 
         config.setExposedHeaders(List.of("Authorization"));
-
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L); // Cache da resposta de CORS por 1 hora
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
