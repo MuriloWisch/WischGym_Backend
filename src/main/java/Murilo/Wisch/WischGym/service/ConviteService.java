@@ -108,6 +108,13 @@ public class ConviteService {
                     conviteRepository.save(c);
                 });
 
+        notificacaoService.criar(
+                convite.getProfessor(),
+                TipoNotificacao.CONVITE_ACEITO,
+                "Convite aceito",
+                "O aluno " + aluno.getNome() + " aceitou seu convite e agora faz parte da sua turma."
+        );
+
         return toDTO(convite);
     }
 
@@ -116,6 +123,13 @@ public class ConviteService {
 
         convite.setStatus(StatusConvite.RECUSADO);
         convite.setDataResposta(LocalDateTime.now());
+
+        notificacaoService.criar(
+                convite.getProfessor(),
+                TipoNotificacao.CONVITE_RECUSADO,
+                "Convite recusado",
+                "O aluno " + convite.getAluno().getNome() + " recusou seu convite."
+        );
 
         return toDTO(conviteRepository.save(convite));
     }

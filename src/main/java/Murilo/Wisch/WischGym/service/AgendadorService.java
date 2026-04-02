@@ -63,6 +63,13 @@ public class AgendadorService {
                 .forEach(m -> {
                     m.setStatus(StatusMatricula.VENCIDA);
                     matriculaRepository.save(m);
+
+                    notificacaoService.criar(
+                            m.getAluno().getUser(),
+                            TipoNotificacao.MATRICULA_EXPIRADA,
+                            "Matrícula expirada",
+                            "Sua matrícula no plano " + m.getPlano().getNome() + " expirou. Renove para continuar treinando."
+                    );
                 });
     }
 }

@@ -3,6 +3,7 @@ package Murilo.Wisch.WischGym.service;
 import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.domain.entities.*;
 
+import Murilo.Wisch.WischGym.domain.enums.TipoNotificacao;
 import Murilo.Wisch.WischGym.dto.treino.*;
 import Murilo.Wisch.WischGym.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class TreinoService {
     private final ExercicioRepository exercicioRepository;
     private final AlunoRepository alunoRepository;
     private final UserRepository userRepository;
+    private final NotificacaoService notificacaoService;
 
     public TreinoResponseDTO criar(String emailProfessor, TreinoCreateDTO dto) {
         User professor = userRepository.findByEmail(emailProfessor)
@@ -54,6 +56,15 @@ public class TreinoService {
                 .collect(Collectors.toList());
 
         treino.setExercicios(exercicios);
+
+        if (aluno.getUser() != null) {
+            notificacaoService.criar(
+                    aluno.getUser(),
+                    TipoNotificacao.NOVO_TREINO,
+                    "Novo treino disponível",
+                    "O professor " + professor.getNome() + " criou um novo treino para você: " + dto.getNome() + "."
+            );
+        }
         return toDTO(treinoRepository.save(treino));
     }
 
@@ -117,6 +128,15 @@ public class TreinoService {
                 })
                 .collect(Collectors.toList());
 
+        if (aluno.getUser() != null) {
+            notificacaoService.criar(
+                    aluno.getUser(),
+                    TipoNotificacao.TREINO_ATUALIZADO,
+                    "Treino atualizado",
+                    "O professor atualizou seu treino: " + dto.getNome() + "."
+            );
+        }
+
         treino.getExercicios().addAll(novosExercicios);
 
         return toDTO(treinoRepository.save(treino));
@@ -125,6 +145,14 @@ public class TreinoService {
     public void desativar(Long id) {
         Treino treino = treinoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Treino não encontrado"));
+        if (treino.getAluno().getUser() != null) {
+            notificacaoService.criar(
+                    treino.getAluno().getUser(),
+                    TipoNotificacao.TREINO_REMOVIDO,
+                    "Treino removido",
+                    "O treino " + treino.getNome() + " foi removido pelo seu professor."
+            );
+        }
         treino.setAtivo(false);
         treinoRepository.save(treino);
     }
