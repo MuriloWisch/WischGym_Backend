@@ -34,9 +34,9 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
-                .csrf(csrf -> csrf.disable())
-
+                // O CORS deve vir primeiro para responder ao Preflight (OPTIONS)
                 .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(sess ->
                         sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Garante liberação do CORS
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
@@ -51,9 +52,9 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
-                                "/planos"
+                                "/planos",
+                                "/planos/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
@@ -65,9 +66,10 @@ public class SecurityConfig {
 
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
+                            // Se chegar aqui em uma rota pública, pode ser erro de lógica no filtro
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Token inválido ou ausente\"}");
+                            response.getWriter().write("{\"error\": \"Acesso negado ou Token inválido\"}");
                         })
                 );
 
@@ -96,5 +98,4 @@ public class SecurityConfig {
     ) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
 }
