@@ -12,15 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableScheduling
 public class WischGymApplication {
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	public static void main(String[] args) {
 		SpringApplication.run(WischGymApplication.class, args);
 	}
 
-	@PostConstruct
-	public void gerarSenha() {
-		String hash = passwordEncoder.encode("123456");
-	}
 }

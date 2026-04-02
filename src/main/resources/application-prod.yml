@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: ${DDL_AUTO}
     show-sql: false
     open-in-view: false
     properties:
@@ -33,7 +33,7 @@ spring:
             scope: openid, profile, email
 
 server:
-  port: ${SERVER_PORT}
+  port: ${PORT:8080}
 
 jwt:
   secret: ${JWT_SECRET}
