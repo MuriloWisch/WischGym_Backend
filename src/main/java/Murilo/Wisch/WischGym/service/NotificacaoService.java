@@ -43,6 +43,14 @@ public class NotificacaoService {
                 .toList();
     }
 
+    @Transactional
+    public void limparTodas(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        notificacaoRepository.deleteAllByDestinatario(user);
+    }
+
     public long contarNaoLidas() {
         return notificacaoRepository
                 .countByDestinatarioIdAndLidaFalse(getUserLogado().getId());

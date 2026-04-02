@@ -1,5 +1,6 @@
 package Murilo.Wisch.WischGym.repository;
 
+import Murilo.Wisch.WischGym.domain.User;
 import Murilo.Wisch.WischGym.domain.entities.Notificacao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -16,5 +17,7 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> 
     @Modifying
     @Query("UPDATE Notificacao n SET n.lida = true WHERE n.destinatario.id = :userId")
     void marcarTodasComoLidas(Long userId);
+
+    void deleteAllByDestinatario(User destinatario);
 
 }
